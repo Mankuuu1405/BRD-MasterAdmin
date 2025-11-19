@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/authServices";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const Login = () => {
     password: ""
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -16,28 +19,35 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // 1️⃣ Get registered users
-    const storedUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+    const { email, password } = formData;
 
-    // 2️⃣ Match email + password
-    const foundUser = storedUsers.find(
-      (user) =>
-        user.email === formData.email && user.password === formData.password
-    );
+    // Try login
+    const user = await authService.login(email, password);
 
-    if (!foundUser) {
+    if (!user) {
+      await authService.recordLoginAttempt({
+        email,
+        status: "Failed"
+      });
+
       alert("Invalid email or password!");
+      setLoading(false);
       return;
     }
 
-    // 3️⃣ Create token + save user session
-    localStorage.setItem("token", "dummy_token_123");
-    localStorage.setItem("currentUser", JSON.stringify(foundUser));
+    // Record success login attempt
+    await authService.recordLoginAttempt({
+      email,
+      status: "Success"
+    });
 
-    // 4️⃣ Direct Redirect to Dashboard (NO ALERT)
+    // Record activity
+    await authService.recordActivity("Logged in", user.email);
+
     navigate("/dashboard");
   };
 
@@ -53,9 +63,8 @@ const Login = () => {
           to continue to your account
         </p>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          
+
           {/* Email */}
           <div>
             <label className="block mb-1 font-medium">Email address</label>
@@ -87,13 +96,13 @@ const Login = () => {
           {/* Submit */}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            Sign in
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        {/* Footer */}
         <p className="text-center mt-4 text-gray-600">
           No account?{" "}
           <a href="/signup" className="text-blue-600 hover:underline">

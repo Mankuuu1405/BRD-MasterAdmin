@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/authServices";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ const Signup = () => {
     confirmPassword: ""
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -19,42 +22,60 @@ const Signup = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    // Email format check
+    if (!formData.email.includes("@")) {
+      alert("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
 
     // Password match check
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
+      setLoading(false);
       return;
     }
 
-    // Get existing users from localStorage
+    // Minimum password strength
+    if (formData.password.length < 8) {
+      alert("Password must be at least 8 characters.");
+      setLoading(false);
+      return;
+    }
+
+    // Check if user already exists (localStorage)
     const storedUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+    const emailExists = storedUsers.some(u => u.email === formData.email);
 
-    // Check email already exists
-    const isEmailExists = storedUsers.some(
-      (user) => user.email === formData.email
-    );
-
-    if (isEmailExists) {
+    if (emailExists) {
       alert("This email is already registered. Please login.");
+      setLoading(false);
       return;
     }
 
-    // Create new user object
+    // Create user object
     const newUser = {
       id: Date.now(),
       firstName: formData.firstName,
       lastName: formData.lastName,
-      email: formData.email,
+      email: formData.email.toLowerCase().trim(),
       password: formData.password,
-      role: "MASTER_ADMIN"
+      role: "MASTER_ADMIN",
+      createdAt: new Date().toLocaleString()
     };
 
-    storedUsers.push(newUser);
+    // Save user (Backend-Ready)
+    await authService.signup(newUser);
 
-    // Save updated list
-    localStorage.setItem("registeredUsers", JSON.stringify(storedUsers));
+    // Record activity
+    await authService.recordActivity(
+      "New account created",
+      newUser.email
+    );
 
     alert("Account created successfully!");
     navigate("/login");
@@ -74,7 +95,7 @@ const Signup = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          
+
           {/* First Name */}
           <div>
             <label className="block mb-1 font-medium">First name</label>
@@ -105,12 +126,12 @@ const Signup = () => {
 
           {/* Email */}
           <div>
-            <label className="block mb-1 font-medium">Email</label>
+            <label className="block mb-1 font-medium">Email Address</label>
             <input
               type="email"
               name="email"
               className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="Enter email"
+              placeholder="Enter your email"
               required
               value={formData.email}
               onChange={handleChange}
@@ -119,14 +140,13 @@ const Signup = () => {
 
           {/* Password */}
           <div>
-            <label className="block mb-1 font-medium">Password (8+ characters)</label>
+            <label className="block mb-1 font-medium">Password (8+ chars)</label>
             <input
               type="password"
               name="password"
               className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="Create password"
               required
-              minLength={8}
               value={formData.password}
               onChange={handleChange}
             />
@@ -154,20 +174,21 @@ const Signup = () => {
               <span className="text-blue-600 cursor-pointer">
                 Xpertland.ai agreements
               </span>{" "}
-              and privacy statement.
+              and privacy policy.
             </p>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            Agree and create account
+            {loading ? "Creating account..." : "Agree and create account"}
           </button>
         </form>
 
-        {/* Switch to login */}
+        {/* Footer */}
         <p className="text-center mt-4 text-gray-600">
           Already have an account?{" "}
           <a href="/login" className="text-blue-600 hover:underline">
