@@ -2,48 +2,40 @@
 
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import { FiArrowLeft, FiKey } from "react-icons/fi";
+import { FiArrowLeft, FiKey, FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { userService } from "../../services/userService";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
 
-  // ---------------- USERS (LocalStorage as mock DB) ----------------
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem("users");
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // ---------------- HANDLERS ----------------
+  // ---------------- LOAD USERS THROUGH SERVICE (Option 2) ----------------
+  useEffect(() => {
+    (async () => {
+      const data = await userService.getUsers();
+      setUsers(data);
+    })();
+  }, []);
 
-  const handleSubmit = (e) => {
+  // ---------------- SUBMIT HANDLER ----------------
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedUser) {
-      alert("Please select a user.");
-      return;
-    }
+    if (!selectedUser) return alert("Please select a user.");
+    if (!newPassword || !confirmPass)
+      return alert("Please enter both password fields.");
 
-    if (!newPassword || !confirmPass) {
-      alert("Please enter both password fields.");
-      return;
-    }
+    if (newPassword !== confirmPass)
+      return alert("Passwords do not match.");
 
-    if (newPassword !== confirmPass) {
-      alert("Passwords do not match.");
-      return;
-    }
-
-    const updated = users.map((u) =>
-      u.id == selectedUser ? { ...u, password: newPassword } : u
-    );
-
-    setUsers(updated);
-    localStorage.setItem("users", JSON.stringify(updated));
+    await userService.updateUser(selectedUser, { password: newPassword });
 
     alert("Password reset successfully!");
     navigate("/users");
@@ -51,7 +43,7 @@ const ResetPassword = () => {
 
   return (
     <MainLayout>
-      {/* HEADER */}
+      {/* ---------------- HEADER ---------------- */}
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate(-1)}
@@ -63,28 +55,24 @@ const ResetPassword = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Reset User Password</h1>
           <p className="text-gray-500 text-sm">
-            Select a user and reset their password
+            Choose a user and reset their password securely
           </p>
         </div>
       </div>
 
-      {/* FORM CONTAINER */}
+      {/* ---------------- FORM CARD ---------------- */}
       <div className="bg-white p-8 rounded-2xl shadow-md max-w-2xl">
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-
+        <form className="space-y-7" onSubmit={handleSubmit}>
           {/* Select User */}
           <div className="flex flex-col">
-            <label className="text-gray-700 text-sm font-medium">
-              Select User
-            </label>
+            <label className="text-gray-700 text-sm font-medium">Select User *</label>
 
             <select
               value={selectedUser}
               onChange={(e) => setSelectedUser(e.target.value)}
               className="mt-2 p-3 rounded-xl bg-gray-50 focus:bg-white shadow-sm outline-none"
             >
-              <option value="">Select a user</option>
+              <option value="">Select user</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.fullName} ({u.username})
@@ -94,36 +82,23 @@ const ResetPassword = () => {
           </div>
 
           {/* New Password */}
-          <div className="flex flex-col">
-            <label className="text-gray-700 text-sm font-medium">
-              New Password
-            </label>
-
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password"
-              className="mt-2 p-3 rounded-xl bg-gray-50 focus:bg-white shadow-sm outline-none"
-            />
-          </div>
+          <PasswordField
+            label="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            show={showPass}
+            toggle={() => setShowPass(!showPass)}
+          />
 
           {/* Confirm Password */}
-          <div className="flex flex-col">
-            <label className="text-gray-700 text-sm font-medium">
-              Confirm Password
-            </label>
+          <PasswordField
+            label="Confirm Password"
+            value={confirmPass}
+            onChange={(e) => setConfirmPass(e.target.value)}
+            show={showConfirm}
+            toggle={() => setShowConfirm(!showConfirm)}
+          />
 
-            <input
-              type="password"
-              value={confirmPass}
-              onChange={(e) => setConfirmPass(e.target.value)}
-              placeholder="Re-enter new password"
-              className="mt-2 p-3 rounded-xl bg-gray-50 focus:bg-white shadow-sm outline-none"
-            />
-          </div>
-
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 shadow-md transition"
@@ -135,5 +110,28 @@ const ResetPassword = () => {
     </MainLayout>
   );
 };
+
+// ---------------- Password Input Reusable Component ----------------
+const PasswordField = ({ label, value, onChange, show, toggle }) => (
+  <div className="flex flex-col relative">
+    <label className="text-gray-700 text-sm font-medium">{label}</label>
+
+    <input
+      type={show ? "text" : "password"}
+      value={value}
+      onChange={onChange}
+      placeholder="••••••••••"
+      className="mt-2 p-3 pr-10 rounded-xl bg-gray-50 focus:bg-white shadow-sm outline-none"
+    />
+
+    <button
+      type="button"
+      onClick={toggle}
+      className="absolute right-3 top-[34px] text-gray-500 hover:text-black"
+    >
+      {show ? <FiEyeOff /> : <FiEye />}
+    </button>
+  </div>
+);
 
 export default ResetPassword;

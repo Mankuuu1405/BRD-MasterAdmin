@@ -1,14 +1,20 @@
-import React, { useState } from "react";
+// src/pages/tenants/Departments.jsx
+
+import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { FiArrowLeft, FiPlus, FiEdit, FiTrash2, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { useDepartments } from "../../hooks/useDepartments";
+
 import { departmentService } from "../../services/departmentService";
+import { organizationService } from "../../services/organizationService";
+import { branchService } from "../../services/branchService";
 
 const Departments = () => {
   const navigate = useNavigate();
 
-  const { departments, loading, reload } = useDepartments();
+  const [departments, setDepartments] = useState([]);
+  const [organizations, setOrganizations] = useState([]);
+  const [branches, setBranches] = useState([]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -17,57 +23,103 @@ const Departments = () => {
     id: null,
     name: "",
     staff: 0,
+    orgId: "",
+    branchId: "",
   });
 
-  // ------------------- OPEN MODALS -------------------
+  // Load Data
+  useEffect(() => {
+    (async () => {
+      setDepartments(await departmentService.getAll());
+      setOrganizations(await organizationService.getOrganizations());
+      setBranches(await branchService.getBranches());
+    })();
+  }, []);
+
+  const filteredBranches = form.orgId
+    ? branches.filter((b) => b.organizationId == form.orgId)
+    : [];
+
+  const reload = async () => {
+    setDepartments(await departmentService.getAll());
+  };
+
+  // Open Add Modal
   const openAddModal = () => {
-    setForm({ id: null, name: "", staff: 0 });
+    setForm({ id: null, name: "", staff: 0, orgId: "", branchId: "" });
     setEditMode(false);
     setModalOpen(true);
   };
 
+  // Open Edit Modal
   const openEditModal = (dept) => {
-    setForm(dept);
+    setForm({
+      id: dept.id,
+      name: dept.name,
+      staff: dept.staff,
+      orgId: dept.orgId,
+      branchId: dept.branchId,
+    });
     setEditMode(true);
     setModalOpen(true);
   };
 
-  // ------------------- DELETE -------------------
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-    await departmentService.remove(id);
-    reload();
-  };
-
-  // ------------------- ADD / UPDATE -------------------
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!form.name.trim()) {
-      alert("Department name is required.");
+    if (name === "orgId") {
+      setForm({
+        ...form,
+        orgId: value,
+        branchId: "",
+      });
       return;
     }
 
+    setForm({
+      ...form,
+      [name]: name === "staff" ? Number(value) : value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!form.name.trim()) return alert("Department name required");
+    if (!form.orgId) return alert("Select organization");
+    if (!form.branchId) return alert("Select branch");
+
+    const payload = {
+      name: form.name,
+      staff: form.staff,
+      orgId: form.orgId,
+      branchId: form.branchId,
+    };
+
     if (editMode) {
-      await departmentService.update(form.id, form);
+      await departmentService.update(form.id, payload);
     } else {
-      await departmentService.add(form);
+      await departmentService.add(payload);
     }
 
     setModalOpen(false);
     reload();
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this department?")) return;
+    await departmentService.remove(id);
+    reload();
+  };
+
   return (
     <MainLayout>
-      {/* ---------------- PAGE HEADER ---------------- */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
-
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 shadow-sm transition"
+            className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 shadow-sm"
           >
             <FiArrowLeft className="text-gray-700 text-xl" />
           </button>
@@ -75,118 +127,141 @@ const Departments = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Departments</h1>
             <p className="text-gray-500 text-sm">
-              Manage departments for your organization
+              Link departments with organization & branch
             </p>
           </div>
         </div>
 
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition font-medium shadow"
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-blue-700"
         >
-          <FiPlus className="text-lg" /> Add Department
+          <FiPlus /> Add Department
         </button>
       </div>
 
-      {/* ---------------- TABLE ---------------- */}
-      <div className="bg-white p-6 rounded-2xl shadow-md">
-
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">
-          Department List
-        </h2>
-
-        {loading ? (
-          <p className="text-gray-500 text-center py-6">Loading...</p>
-        ) : departments.length === 0 ? (
-          <p className="text-gray-500 text-center py-6">No departments found.</p>
+      {/* List */}
+      <div className="bg-white p-6 rounded-xl shadow">
+        {departments.length === 0 ? (
+          <p className="text-gray-500">No departments found.</p>
         ) : (
-          <div className="space-y-3">
-
-            {departments.map((dept, index) => (
-              <div
-                key={dept.id}
-                className="flex items-center justify-between bg-gray-50 p-4 rounded-xl hover:bg-gray-100 transition"
-              >
-                <div>
-                  <h3 className="text-gray-800 font-medium">{dept.name}</h3>
-                  <p className="text-gray-500 text-sm">{dept.staff} Staff</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => openEditModal(dept)}
-                    className="p-2 bg-yellow-100 rounded-lg hover:bg-yellow-200"
-                  >
-                    <FiEdit className="text-yellow-700" />
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(dept.id)}
-                    className="p-2 bg-red-100 rounded-lg hover:bg-red-200"
-                  >
-                    <FiTrash2 className="text-red-600" />
-                  </button>
-                </div>
+          departments.map((d, idx) => (
+            <div
+              key={d.id}
+              className="p-4 bg-gray-50 rounded-xl flex justify-between items-center mb-3"
+            >
+              <div>
+                <p className="font-semibold">{d.name}</p>
+                <p className="text-sm text-gray-500">
+                  Staff: {d.staff} | Org:{" "}
+                  {organizations.find((o) => o.id == d.orgId)?.name} → Branch:{" "}
+                  {branches.find((b) => b.id == d.branchId)?.name}
+                </p>
               </div>
-            ))}
 
-          </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => openEditModal(d)}
+                  className="p-2 bg-yellow-100 rounded-lg"
+                >
+                  <FiEdit className="text-yellow-700" />
+                </button>
+
+                <button
+                  onClick={() => handleDelete(d.id)}
+                  className="p-2 bg-red-100 rounded-lg"
+                >
+                  <FiTrash2 className="text-red-600" />
+                </button>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
-      {/* ---------------- MODAL ---------------- */}
+      {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-[90%] md:w-[420px] relative">
-
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl shadow-md w-[400px] relative">
             <button
               onClick={() => setModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+              className="absolute top-4 right-4"
             >
-              <FiX size={22} />
+              <FiX />
             </button>
 
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-semibold mb-4">
               {editMode ? "Edit Department" : "Add Department"}
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Org */}
               <div>
-                <label className="text-gray-700 text-sm font-medium">
-                  Department Name *
-                </label>
+                <label className="text-sm font-medium">Organization *</label>
+                <select
+                  name="orgId"
+                  value={form.orgId}
+                  onChange={handleChange}
+                  className="w-full p-2 mt-1 bg-gray-50 rounded"
+                >
+                  <option value="">Select organization</option>
+                  {organizations.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Branch */}
+              <div>
+                <label className="text-sm font-medium">Branch *</label>
+                <select
+                  name="branchId"
+                  value={form.branchId}
+                  onChange={handleChange}
+                  disabled={!form.orgId}
+                  className="w-full p-2 mt-1 bg-gray-50 rounded"
+                >
+                  <option value="">
+                    {form.orgId ? "Select branch" : "Select organization first"}
+                  </option>
+                  {filteredBranches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Name */}
+              <div>
+                <label className="text-sm font-medium">Department Name *</label>
                 <input
                   type="text"
+                  name="name"
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full mt-2 p-3 rounded-xl bg-gray-50 focus:bg-white shadow-sm outline-none"
-                  placeholder="Enter department name"
+                  onChange={handleChange}
+                  className="w-full p-2 mt-1 bg-gray-50 rounded"
                 />
               </div>
 
+              {/* Staff */}
               <div>
-                <label className="text-gray-700 text-sm font-medium">
-                  Staff Count
-                </label>
+                <label className="text-sm font-medium">Staff Count</label>
                 <input
                   type="number"
+                  name="staff"
                   value={form.staff}
-                  onChange={(e) =>
-                    setForm({ ...form, staff: Number(e.target.value) })
-                  }
-                  className="w-full mt-2 p-3 rounded-xl bg-gray-50 focus:bg-white shadow-sm outline-none"
-                  placeholder="10"
+                  onChange={handleChange}
+                  className="w-full p-2 mt-1 bg-gray-50 rounded"
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition shadow"
-              >
-                {editMode ? "Update Department" : "Add Department"}
+              <button className="w-full bg-blue-600 text-white py-2 rounded-xl">
+                {editMode ? "Update" : "Add"}
               </button>
             </form>
-
           </div>
         </div>
       )}

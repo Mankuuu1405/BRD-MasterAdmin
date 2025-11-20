@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { FiArrowLeft, FiSave } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { organizationService } from "../../services/organizationService";
-import { branchService } from "../../services/branchService";
+import { organizationService } from "../../services/organizationService";   // ✅ FIX
+import { branchService } from "../../services/branchService";               // ✅ FIX
 
 const CreateBranch = () => {
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ const CreateBranch = () => {
   if (loading)
     return (
       <MainLayout>
-        <p className="text-gray-600">Loading organizations...</p>
+        <p className="text-gray-600 text-sm">Loading organizations...</p>
       </MainLayout>
     );
 
@@ -113,6 +113,7 @@ const CreateBranch = () => {
             onChange={handleChange}
           />
 
+          {/* Address */}
           <div className="flex flex-col">
             <label className="text-gray-700 text-sm font-medium">
               Branch Address *

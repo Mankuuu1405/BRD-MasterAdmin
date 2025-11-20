@@ -5,44 +5,18 @@ import MainLayout from "../../layout/MainLayout";
 import { FiArrowLeft, FiSave } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
+import { organizationService } from "../../services/organizationService";
+import { branchService } from "../../services/branchService";
+import { departmentService } from "../../services/departmentService";
+import { userService } from "../../services/userService";
+
 const AddUser = () => {
   const navigate = useNavigate();
 
-  // ---------------- SAMPLE STATIC DATA (backend not ready) ----------------
-  const sampleOrganizations = [
-    { id: 1, name: "ABC Finance" },
-    { id: 2, name: "XYZ MicroLoans" }
-  ];
-
-  const sampleBranches = [
-    { id: 1, orgId: 1, name: "Branch A" },
-    { id: 2, orgId: 1, name: "Branch B" },
-    { id: 3, orgId: 2, name: "Head Office" }
-  ];
-
-  const sampleDepartments = [
-    { id: 1, branchId: 1, name: "Accounts" },
-    { id: 2, branchId: 1, name: "Loan Processing" },
-    { id: 3, branchId: 2, name: "HR" },
-    { id: 4, branchId: 3, name: "Admin Support" }
-  ];
-
-  const [organizations] = useState(sampleOrganizations);
+  const [organizations, setOrganizations] = useState([]);
   const [branches, setBranches] = useState([]);
   const [departments, setDepartments] = useState([]);
 
-  // ---------------- Users LocalStorage (Mocking Backend) ----------------
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem("users");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Update storage on any user change
-  useEffect(() => {
-    localStorage.setItem("users", JSON.stringify(users));
-  }, [users]);
-
-  // ---------------- FORM STATE ----------------
   const [form, setForm] = useState({
     fullName: "",
     username: "",
@@ -56,70 +30,78 @@ const AddUser = () => {
     status: "Active",
   });
 
-  // ---------------- HANDLERS ----------------
-  const handleChange = (e) => {
+  // ---------------- LOAD ORGANIZATIONS ----------------
+  useEffect(() => {
+    (async () => {
+      const orgs = await organizationService.getOrganizations();
+      setOrganizations(orgs);
+    })();
+  }, []);
+
+  // ---------------- CHANGE HANDLER ----------------
+  const handleChange = async (e) => {
     const { name, value } = e.target;
 
     setForm((prev) => ({ ...prev, [name]: value }));
 
+    // Organization change → load branches
     if (name === "organization") {
-      setBranches(sampleBranches.filter((b) => b.orgId == value));
+      const br = await branchService.getBranchesByOrg(value);
+      setBranches(br);
       setDepartments([]);
-      setForm((prev) => ({
-        ...prev,
-        branch: "",
-        department: "",
-      }));
+      setForm((prev) => ({ ...prev, branch: "", department: "" }));
     }
 
+    // Branch change → load departments
     if (name === "branch") {
-      setDepartments(sampleDepartments.filter((d) => d.branchId == value));
+      const dep = await departmentService.getDepartmentsByBranch(value);
+      setDepartments(dep);
       setForm((prev) => ({ ...prev, department: "" }));
     }
   };
 
-  // ---------------- SUBMIT HANDLER (FIXED & PRODUCTION READY) ----------------
-  const handleSubmit = (e) => {
+  // ---------------- SUBMIT ----------------
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !form.fullName ||
-      !form.username ||
-      !form.email ||
-      !form.phone ||
-      !form.password ||
-      !form.role ||
-      !form.organization ||
-      !form.branch ||
-      !form.department
-    ) {
-      alert("Please fill all fields.");
-      return;
+    // Validate required fields
+    const required = [
+      "fullName",
+      "username",
+      "email",
+      "phone",
+      "password",
+      "role",
+      "organization",
+      "branch",
+      "department",
+    ];
+
+    for (let f of required) {
+      if (!form[f]) {
+        alert(`Please fill ${f}`);
+        return;
+      }
     }
 
-    // ---- BUILD NEW USER OBJECT ----
+    // Build user object
     const newUser = {
-      id: Date.now(),
       ...form,
-      organizationName: organizations.find(o => o.id == form.organization)?.name,
-      branchName: branches.find(b => b.id == form.branch)?.name,
-      departmentName: departments.find(d => d.id == form.department)?.name,
+      id: Date.now(),
+
+      // Resolve Names
+      organizationName:
+        organizations.find((o) => o.id == form.organization)?.name || "",
+      branchName:
+        branches.find((b) => b.id == form.branch)?.name || "",
+      departmentName:
+        departments.find((d) => d.id == form.department)?.name || "",
     };
 
-    // ---- READ EXISTING USERS ----
-    const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-
-    // ---- BUILD UPDATED LIST ----
-    const updatedUsers = [...existingUsers, newUser];
-
-    // ---- SAVE INTO LOCAL STORAGE ----
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-    // ---- UPDATE REACT STATE ----
-    setUsers(updatedUsers);
+    await userService.addUser(newUser);
 
     alert("User added successfully!");
-    navigate("/users");
+    navigate("/users/list");
   };
 
   return (
@@ -141,58 +123,49 @@ const AddUser = () => {
         </div>
       </div>
 
-      {/* FORM CONTAINER */}
+      {/* FORM */}
       <div className="bg-white p-8 rounded-2xl shadow-md max-w-3xl">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Full Name */}
+        <form
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          onSubmit={handleSubmit}
+        >
           <InputField
-            label="Full Name"
             name="fullName"
+            label="Full Name"
             value={form.fullName}
-            placeholder="Enter full name"
             onChange={handleChange}
           />
 
-          {/* Username */}
           <InputField
-            label="Username"
             name="username"
+            label="Username"
             value={form.username}
-            placeholder="Unique username"
             onChange={handleChange}
           />
 
-          {/* Email */}
           <InputField
-            label="Email Address"
             name="email"
+            label="Email"
             type="email"
             value={form.email}
-            placeholder="example@email.com"
             onChange={handleChange}
           />
 
-          {/* Phone */}
           <InputField
-            label="Phone Number"
             name="phone"
+            label="Phone Number"
             value={form.phone}
-            placeholder="+91 XXXXX XXXXX"
             onChange={handleChange}
           />
 
-          {/* Password */}
           <InputField
-            label="Password"
             name="password"
+            label="Password"
             type="password"
             value={form.password}
-            placeholder="Create a strong password"
             onChange={handleChange}
           />
 
-          {/* Role */}
           <SelectField
             label="User Role"
             name="role"
@@ -201,34 +174,39 @@ const AddUser = () => {
             options={["Admin", "Branch Manager", "Loan Officer", "Field Staff"]}
           />
 
-          {/* Organization */}
           <SelectField
             label="Organization"
             name="organization"
             value={form.organization}
             onChange={handleChange}
-            options={organizations.map((o) => ({ label: o.name, value: o.id }))}
+            options={organizations.map((o) => ({
+              label: o.name,
+              value: o.id,
+            }))}
           />
 
-          {/* Branch */}
           <SelectField
             label="Branch"
             name="branch"
             value={form.branch}
             onChange={handleChange}
-            options={branches.map((b) => ({ label: b.name, value: b.id }))}
+            options={branches.map((b) => ({
+              label: b.name,
+              value: b.id,
+            }))}
           />
 
-          {/* Department */}
           <SelectField
             label="Department"
             name="department"
             value={form.department}
             onChange={handleChange}
-            options={departments.map((d) => ({ label: d.name, value: d.id }))}
+            options={departments.map((d) => ({
+              label: d.name,
+              value: d.id,
+            }))}
           />
 
-          {/* Status */}
           <SelectField
             label="Status"
             name="status"
@@ -237,13 +215,9 @@ const AddUser = () => {
             options={["Active", "Inactive"]}
           />
 
-          {/* Submit */}
           <div className="md:col-span-2">
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 shadow-md transition"
-            >
-              <FiSave className="text-lg" /> Add User
+            <button className="w-full bg-blue-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-md">
+              <FiSave /> Add User
             </button>
           </div>
         </form>
@@ -252,8 +226,7 @@ const AddUser = () => {
   );
 };
 
-// ---------------- Reusable Input Component ----------------
-const InputField = ({ label, name, type = "text", value, onChange, placeholder }) => (
+const InputField = ({ label, type = "text", name, value, onChange }) => (
   <div className="flex flex-col">
     <label className="text-gray-700 text-sm font-medium">{label}</label>
     <input
@@ -261,13 +234,11 @@ const InputField = ({ label, name, type = "text", value, onChange, placeholder }
       name={name}
       value={value}
       onChange={onChange}
-      placeholder={placeholder}
       className="mt-2 p-3 rounded-xl bg-gray-50 focus:bg-white shadow-sm outline-none"
     />
   </div>
 );
 
-// ---------------- Reusable Select Component ----------------
 const SelectField = ({ label, name, value, onChange, options }) => (
   <div className="flex flex-col">
     <label className="text-gray-700 text-sm font-medium">{label}</label>
@@ -278,16 +249,11 @@ const SelectField = ({ label, name, value, onChange, options }) => (
       className="mt-2 p-3 rounded-xl bg-gray-50 shadow-sm outline-none"
     >
       <option value="">Select {label}</option>
-
-      {Array.isArray(options) &&
-        options.map((opt, index) => (
-          <option
-            key={index}
-            value={opt.value || opt}
-          >
-            {opt.label || opt}
-          </option>
-        ))}
+      {options.map((op, i) => (
+        <option key={i} value={op.value || op}>
+          {op.label || op}
+        </option>
+      ))}
     </select>
   </div>
 );

@@ -1,70 +1,135 @@
-import { api } from "./api";
+// src/services/userService.js
+// --------------------------------------------------------------
+// FULL PRODUCTION-READY USER SERVICE (Option 2)
+// LocalStorage now → switches to Django API later without UI changes
+// --------------------------------------------------------------
 
-// LOCALSTORAGE fallback logic
+import { api } from "./api"; // backend ready (for future)
+
+// ----------------------- LOCAL STORAGE HELPERS -----------------------
 const getLocal = (key) => JSON.parse(localStorage.getItem(key)) || [];
 const setLocal = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
+const USER_KEY = "users";
+const LOGIN_ATTEMPT_KEY = "loginAttempts";
+const ACTIVITY_KEY = "userActivity";
+
 export const userService = {
 
+  // -------------------------------------------------------------------
   // GET ALL USERS
+  // -------------------------------------------------------------------
   async getUsers() {
-    // For now: get from localStorage
-    return getLocal("users");
+    return getLocal(USER_KEY);
 
-    // Later backend:
-    // return api.get("/users/");
+    // Django Later:
+    // const res = await api.get("/users/");
+    // return res.data;
   },
 
-  // CREATE NEW USER
+  // -------------------------------------------------------------------
+  // ADD NEW USER
+  // -------------------------------------------------------------------
   async addUser(user) {
-    const users = getLocal("users");
-    const updated = [...users, user];
-    setLocal("users", updated);
+    const users = getLocal(USER_KEY);
 
-    return user; // mimic API response
-    // Later: return api.post("/users/", user);
+    const newUser = {
+      id: Date.now(),
+      status: "Active",
+      ...user,
+    };
+
+    users.push(newUser);
+    setLocal(USER_KEY, users);
+
+    return newUser;
+
+    // Django Later:
+    // return api.post("/users/", newUser);
   },
 
+  // -------------------------------------------------------------------
   // UPDATE USER
+  // -------------------------------------------------------------------
   async updateUser(id, payload) {
-    const users = getLocal("users");
+    const users = getLocal(USER_KEY);
     const updated = users.map((u) => (u.id === id ? { ...u, ...payload } : u));
-    setLocal("users", updated);
 
+    setLocal(USER_KEY, updated);
     return updated.find((u) => u.id === id);
-    // Later: api.put(`/users/${id}/`, payload);
+
+    // Django Later:
+    // return api.put(`/users/${id}/`, payload);
   },
 
-  // DELETE USER
-  async deleteUser(id) {
-    const filtered = getLocal("users").filter((u) => u.id !== id);
-    setLocal("users", filtered);
+  // -------------------------------------------------------------------
+  // TOGGLE USER STATUS (Active/Inactive)
+  // -------------------------------------------------------------------
+  async toggleUserStatus(id) {
+    const users = getLocal(USER_KEY);
 
+    const updated = users.map((u) =>
+      u.id === id
+        ? { ...u, status: u.status === "Active" ? "Inactive" : "Active" }
+        : u
+    );
+
+    setLocal(USER_KEY, updated);
     return true;
-    // Later: api.delete(`/users/${id}/`);
+
+    // Django Later:
+    // return api.patch(`/users/${id}/toggle-status/`);
   },
 
-  // LOGIN ATTEMPTS
+  // -------------------------------------------------------------------
+  // DELETE USER
+  // -------------------------------------------------------------------
+  async deleteUser(id) {
+    const filtered = getLocal(USER_KEY).filter((u) => u.id !== id);
+    setLocal(USER_KEY, filtered);
+    return true;
+
+    // Django Later:
+    // return api.delete(`/users/${id}/`);
+  },
+
+  // -------------------------------------------------------------------
+  // LOGIN ATTEMPTS LOG
+  // -------------------------------------------------------------------
   async recordLoginAttempt(log) {
-    const logs = getLocal("loginAttempts");
+    const logs = getLocal(LOGIN_ATTEMPT_KEY);
     const updated = [log, ...logs];
-    setLocal("loginAttempts", updated);
+    setLocal(LOGIN_ATTEMPT_KEY, updated);
+    return true;
+
+    // Django Later:
+    // return api.post("/users/login-attempts/", log);
   },
 
   async getLoginAttempts() {
-    return getLocal("loginAttempts");
-    // Later: api.get("/users/login-attempts/");
+    return getLocal(LOGIN_ATTEMPT_KEY);
+
+    // Django Later:
+    // return api.get("/users/login-attempts/");
   },
 
+  // -------------------------------------------------------------------
   // USER ACTIVITY LOG
+  // -------------------------------------------------------------------
   async recordActivity(log) {
-    const logs = getLocal("userActivity");
+    const logs = getLocal(ACTIVITY_KEY);
     const updated = [log, ...logs];
-    setLocal("userActivity", updated);
+    setLocal(ACTIVITY_KEY, updated);
+    return true;
+
+    // Django Later:
+    // return api.post("/users/activity/", log);
   },
 
   async getUserActivity() {
-    return getLocal("userActivity");
-    // Later: api.get("/users/activity/");
+    return getLocal(ACTIVITY_KEY);
+
+    // Django Later:
+    // return api.get("/users/activity/");
   },
 };
