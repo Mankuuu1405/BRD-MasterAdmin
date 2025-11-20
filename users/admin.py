@@ -1,29 +1,42 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, AuditLog
+from .models import User, AuditLog, UserProfile
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('email','first_name','last_name','role','tenant','is_active')
-    list_filter = ('role','is_active','tenant')
-    search_fields = ('email','first_name','last_name')
+
+    # Fields to display in list page
+    list_display = ('email', 'role', 'phone', 'tenant', 'is_active', 'created_at')
+    list_filter = ('role', 'tenant', 'is_active')
+    search_fields = ('email', 'phone', 'role')
     ordering = ('-created_at',)
+
+    # Fields shown when editing a user
     fieldsets = (
-        ('Auth', {'fields':('email','password')}),
-        ('Personal', {'fields':('first_name','last_name','phone')}),
-        ('Org', {'fields':('tenant','branch','role','employee_id')}),
-        ('Permissions', {'fields':('is_active','is_staff','is_superuser')}),
+        ('Auth', {'fields': ('email', 'password')}),
+        ('Personal Details', {'fields': ('phone',)}),
+        ('Organization', {'fields': ('tenant', 'branch', 'role', 'employee_id', 'approval_limit')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
     )
-    add_fieldsets = ((None, {'classes':('wide',),'fields':('email','password1','password2','first_name','last_name','role')}),)
+
+    # Fields shown when creating a user
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'role')
+        }),
+    )
+
+    readonly_fields = ('created_at', 'updated_at')
+
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = ('user','action_type','module','timestamp','ip_address')
-    list_filter = ('action_type','module')
-    readonly_fields = ('user','action_type','module','timestamp')
+    list_display = ('user', 'action_type', 'module', 'timestamp', 'ip_address')
+    list_filter = ('action_type', 'module')
+    readonly_fields = ('user', 'action_type', 'module', 'timestamp', 'ip_address')
 
-from django.contrib import admin
-from .models import UserProfile
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):

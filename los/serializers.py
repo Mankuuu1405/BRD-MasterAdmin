@@ -1,18 +1,30 @@
+# los/serializers.py
 from rest_framework import serializers
 from .models import LoanApplication, KYCDetail, CreditAssessment
 
 class KYCDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = KYCDetail
-        fields = '__all__'
+        fields = ['id', 'loan_application', 'kyc_type', 'document_number', 'document_file', 'status', 'uploaded_at']
+        read_only_fields = ['id', 'uploaded_at', 'status']
+
 
 class CreditAssessmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditAssessment
-        fields = '__all__'
+        fields = ['id', 'application', 'score', 'remarks', 'status', 'approved_limit', 'assessed_at']
+        read_only_fields = ['id', 'assessed_at']
+
 
 class LoanApplicationSerializer(serializers.ModelSerializer):
-    assessment = CreditAssessmentSerializer(read_only=True)
+    kyc_details = KYCDetailSerializer(many=True, read_only=True)
+    credit_assessment = CreditAssessmentSerializer(read_only=True)
+
     class Meta:
         model = LoanApplication
-        fields = '__all__'
+        fields = [
+            'id', 'application_id', 'tenant', 'branch', 'customer',
+            'amount', 'tenure_months', 'interest_rate', 'status',
+            'created_by', 'created_at', 'updated_at', 'kyc_details', 'credit_assessment'
+        ]
+        read_only_fields = ['id', 'application_id', 'created_at', 'updated_at']

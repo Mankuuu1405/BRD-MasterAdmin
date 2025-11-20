@@ -1,12 +1,8 @@
+# los/urls.py
 from rest_framework.routers import DefaultRouter
-from .views import LoanApplicationViewSet, KYCDetailViewSet, CreditAssessmentViewSet
-from django.urls import path, include
+from .views import LoanApplicationViewSet
 
 router = DefaultRouter()
-router.register('applications', LoanApplicationViewSet, basename='loanapplication')
-router.register('kyc', KYCDetailViewSet, basename='kyc')
-router.register('assessments', CreditAssessmentViewSet, basename='assessment')
+router.register(r'applications', LoanApplicationViewSet, basename='applications')
 
-urlpatterns = [
-    path('', include(router.urls)),
-]
+urlpatterns = router.urls

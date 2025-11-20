@@ -20,4 +20,6 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/communications/', include('communications.urls')),
     path('api/documents/', include('documents.urls')),
+    path('', include('crm.urls')),
+
 ]
