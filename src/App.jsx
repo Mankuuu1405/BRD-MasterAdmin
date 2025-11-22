@@ -38,7 +38,7 @@ import DocumentTemplates from "./pages/masterData/DocumentTemplates";
 import CreditScoring from "./pages/masterData/CreditScoring";
 
 import SystemConfig from "./pages/systemConfig/SystemConfig";
-import LoanPolicies from "./pages/systemConfig/LoanPolicies";
+import LoanPolicies from "./pages/systemConfig/loanPolicyService";
 import SecuritySettings from "./pages/systemConfig/SecuritySettings";
 import RepaymentRules from "./pages/systemConfig/RepaymentRules";
 import WorkflowMain from "./pages/workflow/WorkflowMain";
