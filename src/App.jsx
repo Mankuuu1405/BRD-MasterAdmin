@@ -66,7 +66,7 @@ import ReportingAnalytics from "./pages/Reports/ReportingAnalytics";
 import DailyDisbursementReport from "./pages/Reports/DailyDisbursementReport"
 import BranchPerformanceReport from "./pages/Reports/BranchPerformanceReport"
 import LoanApprovalRejectionReport from "./pages/Reports/LoanApprovalRejectionReport"
-import NpaReport from "./pages/Reports/NPAReport";
+import NpaReport from "./pages/Reports/NpaReport";
 import RevenueReport from "./pages/Reports/RevenueReport";
 import UserActivityReport from "./pages/Reports/UserActivityReport";
 import AuditMain from "./pages/audit/AuditMain";
