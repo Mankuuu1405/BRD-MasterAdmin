@@ -1,4 +1,3 @@
-// src/pages/tenants/AddOrganization.jsx
 import React, { useState } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { FiArrowLeft, FiSave, FiUploadCloud } from "react-icons/fi";
@@ -8,7 +7,6 @@ import { organizationService } from "../../services/organizationService";
 export default function AddOrganization() {
   const navigate = useNavigate();
 
-  // ---------------- FORM STATE ----------------
   const [form, setForm] = useState({
     name: "",
     address: "",
@@ -28,7 +26,6 @@ export default function AddOrganization() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
 
-  // ---------------- FORM HANDLERS ----------------
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -38,7 +35,6 @@ export default function AddOrganization() {
     setLogoPreview(URL.createObjectURL(file));
   };
 
-  // ---------------- SUBMIT HANDLER ----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -63,13 +59,13 @@ export default function AddOrganization() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 transition shadow-sm"
+          className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition border border-gray-200"
         >
-          <FiArrowLeft className="text-gray-700 text-xl" />
+          <FiArrowLeft className="text-gray-700 text-lg" />
         </button>
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-[22px] font-semibold text-gray-900">
             Add New Organization
           </h1>
           <p className="text-gray-500 text-sm">
@@ -78,22 +74,20 @@ export default function AddOrganization() {
         </div>
       </div>
 
-      {/* FORM CARD */}
-      <div className="bg-white p-8 rounded-2xl shadow-md max-w-4xl">
+      {/* FORM CONTAINER */}
+      <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm max-w-4xl">
 
-        {/* Error Box */}
         {errors && (
           <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">
             {errors}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-10">
 
-          {/* MAIN GRID */}
+          {/* GRID FIELDS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-            {/* Organization Name */}
             <InputField
               label="Organization Name *"
               name="name"
@@ -103,7 +97,6 @@ export default function AddOrganization() {
               required
             />
 
-            {/* Business Type */}
             <SelectField
               label="Business Type *"
               name="business_type"
@@ -118,7 +111,6 @@ export default function AddOrganization() {
               ]}
             />
 
-            {/* Contact Person */}
             <InputField
               label="Contact Person *"
               name="contact_person"
@@ -128,7 +120,6 @@ export default function AddOrganization() {
               required
             />
 
-            {/* Email */}
             <InputField
               label="Email Address *"
               name="email"
@@ -139,7 +130,6 @@ export default function AddOrganization() {
               required
             />
 
-            {/* Phone */}
             <InputField
               label="Phone Number *"
               name="phone"
@@ -149,7 +139,6 @@ export default function AddOrganization() {
               required
             />
 
-            {/* Registration No */}
             <InputField
               label="Registration No / CIN"
               name="registration_no"
@@ -158,7 +147,6 @@ export default function AddOrganization() {
               onChange={handleChange}
             />
 
-            {/* GST No */}
             <InputField
               label="GST Number"
               name="gst_number"
@@ -168,7 +156,6 @@ export default function AddOrganization() {
               onChange={handleChange}
             />
 
-            {/* PAN No */}
             <InputField
               label="PAN Number"
               name="pan_number"
@@ -178,7 +165,6 @@ export default function AddOrganization() {
               onChange={handleChange}
             />
 
-            {/* Loan Prefix */}
             <InputField
               label="Loan ID Prefix *"
               name="loan_prefix"
@@ -187,7 +173,6 @@ export default function AddOrganization() {
               onChange={handleChange}
               required
             />
-
           </div>
 
           {/* ADDRESS */}
@@ -199,16 +184,16 @@ export default function AddOrganization() {
               onChange={handleChange}
               required
               placeholder="Head Office Address"
-              className="w-full mt-2 p-3 rounded-xl bg-gray-50 shadow-sm focus:bg-white outline-none"
+              className="w-full mt-2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white outline-none text-sm"
             />
           </div>
 
           {/* LOGO UPLOAD */}
           <div>
             <label className="text-gray-700 text-sm font-medium">Company Logo</label>
-            <div className="mt-2 flex items-center gap-4">
-              <label className="p-3 rounded-xl bg-gray-50 border border-dashed cursor-pointer hover:bg-gray-100 flex items-center gap-2">
-                <FiUploadCloud className="text-gray-600" />
+            <div className="mt-3 flex items-center gap-4">
+              <label className="px-4 py-3 rounded-xl bg-gray-50 border border-dashed border-gray-300 cursor-pointer hover:bg-gray-100 flex items-center gap-2 text-sm text-gray-700">
+                <FiUploadCloud className="text-gray-600 text-lg" />
                 <span>Upload Logo</span>
                 <input type="file" hidden accept="image/*" onChange={handleLogoChange} />
               </label>
@@ -217,7 +202,7 @@ export default function AddOrganization() {
                 <img
                   src={logoPreview}
                   alt="Logo Preview"
-                  className="h-16 w-16 rounded-lg shadow object-cover"
+                  className="h-16 w-16 rounded-xl border border-gray-200 shadow-sm object-cover"
                 />
               )}
             </div>
@@ -225,51 +210,52 @@ export default function AddOrganization() {
 
           {/* ACTIVE STATUS */}
           <div className="flex items-center gap-3">
-            <label className="text-gray-700 text-sm font-medium">Is Active?</label>
             <input
               type="checkbox"
               checked={form.is_active}
               onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
               className="w-5 h-5"
             />
+            <label className="text-gray-700 text-sm font-medium">Active Organization</label>
           </div>
 
-          {/* SUBMIT */}
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition text-sm"
           >
-            <FiSave />
+            <FiSave className="text-lg" />
             {loading ? "Saving..." : "Save Organization"}
           </button>
+
         </form>
       </div>
     </MainLayout>
   );
 }
 
-/* ---------------- REUSABLE INPUT COMPONENT ---------------- */
+/* ---------------- INPUT FIELD ---------------- */
 function InputField({ label, ...props }) {
   return (
     <div>
       <label className="text-gray-700 text-sm font-medium">{label}</label>
       <input
         {...props}
-        className="w-full mt-2 p-3 rounded-xl bg-gray-50 shadow-sm focus:bg-white outline-none"
+        className="w-full mt-2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white outline-none text-sm"
       />
     </div>
   );
 }
 
-/* ---------------- REUSABLE SELECT COMPONENT ---------------- */
+/* ---------------- SELECT FIELD ---------------- */
 function SelectField({ label, options = [], ...props }) {
   return (
     <div>
       <label className="text-gray-700 text-sm font-medium">{label}</label>
       <select
         {...props}
-        className="w-full mt-2 p-3 rounded-xl bg-gray-50 shadow-sm outline-none"
+        className="w-full mt-2 p-3 rounded-xl bg-gray-50 border border-gray-200 outline-none text-sm"
       >
         <option value="">Select option</option>
         {options.map((op, i) => (

@@ -1,15 +1,9 @@
-// src/pages/masterData/MasterData.jsx
 import React from "react";
 import MainLayout from "../../layout/MainLayout";
-import {
-  FiList,
-  FiPercent,
-  FiFileText,
-  FiBarChart2,
-} from "react-icons/fi";
+import { FiFileText, FiShield, FiCalendar } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
-// ★ Sidebar-style FeatureCard
+// ★ Sidebar-style FeatureCard (same as all other pages)
 const FeatureCard = ({ title, icon, onClick }) => (
   <div
     onClick={onClick}
@@ -24,49 +18,44 @@ const FeatureCard = ({ title, icon, onClick }) => (
       })}
     </div>
 
-    {/* Title */}
+    {/* Text */}
     <h3 className="text-gray-800 text-[15px] font-medium">{title}</h3>
   </div>
 );
 
-// ---- ICONS (clean theme — no colors)
+// NEW CLEAN ICONS (no colors)
 const items = [
   {
-    title: "Define Loan Product Types",
-    icon: <FiList />,
-    link: "/master/loan-products",
-  },
-  {
-    title: "Set Interest Settings (ROI, Fees, Penalty)",
-    icon: <FiPercent />,
-    link: "/master/interest-settings",
-  },
-  {
-    title: "Create Document Templates",
+    title: "Set Loan Policies (Min/Max, Tenure, EMI, Validation)",
     icon: <FiFileText />,
-    link: "/master/document-template",
+    link: "/system/policies",
   },
   {
-    title: "Set Credit Scoring Rules",
-    icon: <FiBarChart2 />,
-    link: "/master/credit-scoring",
+    title: "Set Security Settings (Password, 2FA, API Token)",
+    icon: <FiShield />,
+    link: "/system/security",
+  },
+  {
+    title: "Set Repayment Rules (EMI Date, Auto Debit)",
+    icon: <FiCalendar />,
+    link: "/system/repayment",
   },
 ];
 
-const MasterData = () => {
+const SystemConfig = () => {
   const navigate = useNavigate();
 
   return (
     <MainLayout>
-      {/* Header */}
+      {/* PAGE HEADER */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Data Configuration</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">System Configuration</h1>
         <p className="text-gray-500 text-sm">
-          Configure loan products, interest settings, templates & scoring rules.
+          Configure loan policies, security rules & repayment settings.
         </p>
       </div>
 
-      {/* Feature Panel */}
+      {/* GRID PANEL */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {items.map((item, i) => (
@@ -83,4 +72,4 @@ const MasterData = () => {
   );
 };
 
-export default MasterData;
+export default SystemConfig;

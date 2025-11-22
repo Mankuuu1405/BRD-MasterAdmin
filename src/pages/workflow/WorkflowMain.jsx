@@ -1,15 +1,14 @@
-// src/pages/masterData/MasterData.jsx
 import React from "react";
 import MainLayout from "../../layout/MainLayout";
+import { useNavigate } from "react-router-dom";
 import {
   FiList,
-  FiPercent,
-  FiFileText,
-  FiBarChart2,
+  FiUserCheck,
+  FiClock,
+  FiAlertCircle,
 } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 
-// ★ Sidebar-style FeatureCard
+// ★ Sidebar-style FeatureCard (LOS THEME)
 const FeatureCard = ({ title, icon, onClick }) => (
   <div
     onClick={onClick}
@@ -24,45 +23,44 @@ const FeatureCard = ({ title, icon, onClick }) => (
       })}
     </div>
 
-    {/* Title */}
     <h3 className="text-gray-800 text-[15px] font-medium">{title}</h3>
   </div>
 );
 
-// ---- ICONS (clean theme — no colors)
+// Clean icon list
 const items = [
   {
-    title: "Define Loan Product Types",
+    title: "Define Loan Workflow Steps",
     icon: <FiList />,
-    link: "/master/loan-products",
+    link: "/workflow/steps",
   },
   {
-    title: "Set Interest Settings (ROI, Fees, Penalty)",
-    icon: <FiPercent />,
-    link: "/master/interest-settings",
+    title: "Assign Steps to Roles",
+    icon: <FiUserCheck />,
+    link: "/workflow/assign",
   },
   {
-    title: "Create Document Templates",
-    icon: <FiFileText />,
-    link: "/master/document-template",
+    title: "Set Time Limits",
+    icon: <FiClock />,
+    link: "/workflow/time-limits",
   },
   {
-    title: "Set Credit Scoring Rules",
-    icon: <FiBarChart2 />,
-    link: "/master/credit-scoring",
+    title: "Configure Automatic Escalations",
+    icon: <FiAlertCircle />,
+    link: "/workflow/escalations",
   },
 ];
 
-const MasterData = () => {
+const WorkflowMain = () => {
   const navigate = useNavigate();
 
   return (
     <MainLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Data Configuration</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Workflow Management</h1>
         <p className="text-gray-500 text-sm">
-          Configure loan products, interest settings, templates & scoring rules.
+          Control workflow steps, role mapping, timings & escalation rules.
         </p>
       </div>
 
@@ -83,4 +81,4 @@ const MasterData = () => {
   );
 };
 
-export default MasterData;
+export default WorkflowMain;

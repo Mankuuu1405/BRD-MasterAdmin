@@ -10,8 +10,6 @@ import useDashboard from "../hooks/useDashboard";
 import { dashboardService } from "../services/dashboardService";
 
 const Dashboard = () => {
-
-  // Fetch dashboard summary
   const { data: cards, loading: loadingCards } = useDashboard(
     dashboardService.getSummaryCards
   );
@@ -45,7 +43,7 @@ const Dashboard = () => {
   return (
     <MainLayout>
 
-      {/* TOP CARDS */}
+      {/* TOP CARDS — SCREENSHOT STYLE */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
         <Card title="Total Organizations" value={cards.totalOrganizations} />
@@ -59,13 +57,13 @@ const Dashboard = () => {
 
       </div>
 
-      {/* CHARTS SECTION */}
+      {/* CHARTS */}
       <div className="flex flex-col gap-8 mb-10">
         <ActiveUserChart usersPerBranch={usersPerBranch} />
         <LoanTrendChart data={loanTrendData} />
       </div>
 
-      {/* BOTTOM PANEL */}
+      {/* ACTIVITY + ALERTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
         <ReactiveActivity activities={activities} />
         <AlertsPage alerts={alerts} />
@@ -75,11 +73,22 @@ const Dashboard = () => {
   );
 };
 
-// Reusable Card Component
+
+
+// -----------------------
+//   CARD COMPONENT
+// -----------------------
 const Card = ({ title, value }) => (
-  <div className="bg-white rounded-xl p-6 shadow hover:shadow-xl transition border-l-6 border-blue-600">
-    <h3 className="text-gray-600 text-md">{title}</h3>
-    <p className="text-3xl font-bold text-gray-900 mt-3">{value}</p>
+  <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
+
+    <div className="flex flex-col">
+      <h3 className="text-gray-600 text-sm font-medium">{title}</h3>
+
+      <p className="text-3xl font-semibold text-gray-900 mt-3">
+        {value}
+      </p>
+    </div>
+
   </div>
 );
 

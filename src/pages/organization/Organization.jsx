@@ -12,34 +12,39 @@ import {
 } from "react-icons/fi";
 
 
-
-// Reusable Card Component
+// ---------------------
+//  STAT CARD — Screenshot Theme
+// ---------------------
 const StatCard = ({ title, value }) => (
-  <div className="bg-white rounded-xl p-6 shadow hover:shadow-xl transition border-l-6 border-blue-600">
-    <h3 className="text-gray-600 text-md">{title}</h3>
-    <p className="text-3xl font-bold mt-3 text-gray-900">{value}</p>
+  <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
+    <h3 className="text-gray-600 text-sm font-medium">{title}</h3>
+    <p className="text-3xl font-semibold text-gray-900 mt-3">{value}</p>
   </div>
 );
 
-// Feature Card Component
+
+// ---------------------
+//  FEATURE CARD — Screenshot Theme
+// ---------------------
 const FeatureCard = ({ title, icon, onClick }) => (
   <div
     onClick={onClick}
-    className="w-full bg-white rounded-xl p-4 flex items-center space-x-4 
-               hover:shadow-lg transition cursor-pointer"
+    className="w-full bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 cursor-pointer 
+               hover:shadow-md transition-all"
   >
-    <div className="w-14 h-14 flex items-center justify-center bg-gray-100 
-                    rounded-lg border">
+    {/* Light Grey Icon Box */}
+    <div className="w-14 h-14 bg-gray-100 border border-gray-200 rounded-xl flex items-center justify-center">
       {icon}
     </div>
-    <h3 className="text-gray-800 text-base font-semibold">{title}</h3>
+
+    <h3 className="text-gray-800 text-[15px] font-medium">{title}</h3>
   </div>
 );
+
 
 const Organization = () => {
   const navigate = useNavigate();
 
-  // Fetch summary
   const { data: summary, loading } = useOrganizations(
     organizationService.getOrganizationSummary
   );
@@ -47,27 +52,27 @@ const Organization = () => {
   const orgFeatures = [
     {
       title: "Add New Organization",
-      icon: <FiPlusCircle className="text-indigo-500 text-xl" />,
+      icon: <FiPlusCircle className="text-indigo-600 text-xl" />,
       onClick: () => navigate("/organization/add"),
     },
     {
       title: "Create Branches",
-      icon: <FiMapPin className="text-green-500 text-xl" />,
+      icon: <FiMapPin className="text-green-600 text-xl" />,
       onClick: () => navigate("/organization/branches/create"),
     },
     {
       title: "Define Departments",
-      icon: <FiLayers className="text-yellow-500 text-xl" />,
+      icon: <FiLayers className="text-yellow-600 text-xl" />,
       onClick: () => navigate("/organization/departments"),
     },
     {
       title: "Assign Staff to Departments",
-      icon: <FiUserCheck className="text-blue-500 text-xl" />,
+      icon: <FiUserCheck className="text-blue-600 text-xl" />,
       onClick: () => navigate("/organization/staff-assign"),
     },
     {
       title: "Assign Module Access to Branch",
-      icon: <FiKey className="text-red-500 text-xl" />,
+      icon: <FiKey className="text-red-600 text-xl" />,
       onClick: () => navigate("/organization/module-access"),
     },
   ];
@@ -83,11 +88,9 @@ const Organization = () => {
   return (
     <MainLayout>
 
-      {/* HEADER */}
+      {/* PAGE HEADER */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Organization Management
-        </h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Organization Management</h1>
         <p className="text-gray-500 text-sm mt-1">
           Manage organizations, branches, departments, staff & module access.
         </p>
@@ -104,8 +107,8 @@ const Organization = () => {
       </div>
 
       {/* FEATURE MODULES */}
-      <div className="rounded-2xl p-6 bg-white shadow-sm">
-        <h2 className="text-gray-700 text-sm font-bold tracking-wide mb-6 border-b pb-3">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-gray-700 text-[13px] font-bold tracking-wide mb-6 border-b pb-3">
           ORGANIZATION AND BRANCH MANAGEMENT
         </h2>
 
