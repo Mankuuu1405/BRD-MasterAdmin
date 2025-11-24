@@ -21,5 +21,7 @@ urlpatterns = [
     path('api/communications/', include('communications.urls')),
     path('api/documents/', include('documents.urls')),
     path('', include('crm.urls')),
+    path('api/los/', include('los.urls')),
+    path('api/adminpanel/', include('adminpanel.urls')),
 
 ]

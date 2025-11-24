@@ -4,16 +4,20 @@ from .models import LoanApplication, KYCDetail, CreditAssessment
 
 @admin.register(LoanApplication)
 class LoanApplicationAdmin(admin.ModelAdmin):
-    list_display = ('application_id', 'customer', 'amount', 'tenure_months', 'status', 'created_at')
+    list_display = ('application_id', 'customer', 'tenant', 'branch', 'amount', 'status', 'created_at')
     search_fields = ('application_id', 'customer__first_name', 'customer__phone')
-    list_filter = ('status',)
+    list_filter = ('status', 'tenant', 'branch')
+    readonly_fields = ('application_id', 'created_at', 'updated_at')
 
 @admin.register(KYCDetail)
 class KYCDetailAdmin(admin.ModelAdmin):
     list_display = ('loan_application', 'kyc_type', 'document_number', 'status', 'uploaded_at')
-    search_fields = ('loan_application__application_id', 'document_number')
+    list_filter = ('kyc_type', 'status')
+    search_fields = ('document_number',)
+    readonly_fields = ('uploaded_at',)
 
 @admin.register(CreditAssessment)
 class CreditAssessmentAdmin(admin.ModelAdmin):
     list_display = ('application', 'score', 'status', 'approved_limit', 'assessed_at')
     search_fields = ('application__application_id',)
+    readonly_fields = ('assessed_at',)

@@ -1,91 +1,74 @@
 # los/views.py
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 from .models import LoanApplication, KYCDetail, CreditAssessment
 from .serializers import LoanApplicationSerializer, KYCDetailSerializer, CreditAssessmentSerializer
+from .permissions import IsTenantMember
 
 class LoanApplicationViewSet(viewsets.ModelViewSet):
-    """
-    CRUD for LoanApplication + custom actions:
-      - upload_kyc
-      - submit
-      - assess (create/update credit assessment)
-      - approve / reject
-      - disburse
-    """
-    queryset = LoanApplication.objects.all()
+    queryset = LoanApplication.objects.all().select_related('tenant', 'branch', 'customer', 'created_by')
     serializer_class = LoanApplicationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTenantMember]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status', 'tenant', 'branch', 'customer']
+    search_fields = ['application_id', 'customer__first_name', 'customer__phone']
+    ordering_fields = ['created_at', 'amount']
+    ordering = ['-created_at']
 
     def perform_create(self, serializer):
-        # Auto-set created_by if available
-        user = getattr(self.request, 'user', None)
-        serializer.save(created_by=user)
+        # created_by handled in serializer.create but keep here for safety
+        serializer.save(created_by=self.request.user)
 
-    @action(detail=True, methods=['post'])
-    def upload_kyc(self, request, pk=None):
-        app = self.get_object()
-        data = request.data.copy()
-        data['loan_application'] = app.id
-        serializer = KYCDetailSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @action(detail=True, methods=['post'])
-    def submit(self, request, pk=None):
-        app = self.get_object()
-        if app.status != 'NEW':
-            return Response({'detail': 'Only NEW applications can be submitted.'}, status=status.HTTP_400_BAD_REQUEST)
-        app.status = 'SUBMITTED'
-        app.save()
-        return Response({'detail': 'Application submitted', 'status': app.status})
-
-    @action(detail=True, methods=['post'])
-    def assess(self, request, pk=None):
+    @action(detail=True, methods=['post'], url_path='change-status')
+    def change_status(self, request, pk=None):
         """
-        Create or update CreditAssessment for this application.
-        Expected payload: { "score": 650, "remarks": "...", "status": "APPROVED", "approved_limit": 50000 }
+        Custom endpoint to update status of loan application.
+        Body: {"status": "APPROVED"} (must be valid choice)
         """
         app = self.get_object()
-        payload = request.data
-        try:
-            ca = app.credit_assessment
-            serializer = CreditAssessmentSerializer(ca, data=payload, partial=True)
-        except CreditAssessment.DoesNotExist:
-            payload['application'] = app.id
-            serializer = CreditAssessmentSerializer(data=payload)
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['post'])
-    def approve(self, request, pk=None):
-        app = self.get_object()
-        if app.status not in ['SUBMITTED', 'UNDER_REVIEW']:
-            return Response({'detail': 'Only SUBMITTED/UNDER_REVIEW apps can be approved.'}, status=status.HTTP_400_BAD_REQUEST)
-        app.status = 'APPROVED'
+        new_status = request.data.get('status')
+        if not new_status:
+            return Response({'detail': 'status is required'}, status=status.HTTP_400_BAD_REQUEST)
+        app.status = new_status
         app.save()
-        return Response({'detail': 'Application approved', 'status': app.status})
+        return Response(self.get_serializer(app).data)
 
-    @action(detail=True, methods=['post'])
-    def reject(self, request, pk=None):
-        app = self.get_object()
-        app.status = 'REJECTED'
-        app.save()
-        return Response({'detail': 'Application rejected', 'status': app.status})
+class KYCDetailViewSet(viewsets.ModelViewSet):
+    queryset = KYCDetail.objects.all().select_related('loan_application')
+    serializer_class = KYCDetailSerializer
+    permission_classes = [IsAuthenticated, IsTenantMember]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['loan_application', 'kyc_type', 'status']
+    search_fields = ['document_number']
+    ordering_fields = ['uploaded_at']
+    ordering = ['-uploaded_at']
 
-    @action(detail=True, methods=['post'])
-    def disburse(self, request, pk=None):
-        app = self.get_object()
-        if app.status != 'APPROVED':
-            return Response({'detail': 'Only APPROVED applications can be disbursed.'}, status=status.HTTP_400_BAD_REQUEST)
-        app.status = 'DISBURSED'
-        app.save()
-        # (LMS: you may create a LoanAccount here in a later step)
-        return Response({'detail': 'Loan disbursed', 'status': app.status})
+    # override create to allow file uploads
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+class CreditAssessmentViewSet(viewsets.ModelViewSet):
+    queryset = CreditAssessment.objects.all().select_related('application')
+    serializer_class = CreditAssessmentSerializer
+    permission_classes = [IsAuthenticated, IsTenantMember]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status', 'application']
+    search_fields = ['remarks']
+    ordering = ['-assessed_at']
+
+    @action(detail=True, methods=['post'], url_path='update-score')
+    def update_score(self, request, pk=None):
+        ca = self.get_object()
+        score = request.data.get('score')
+        remarks = request.data.get('remarks', '')
+        if score is None:
+            return Response({'detail': 'score required'}, status=status.HTTP_400_BAD_REQUEST)
+        ca.score = int(score)
+        ca.remarks = remarks
+        ca.save()
+        return Response(self.get_serializer(ca).data)
