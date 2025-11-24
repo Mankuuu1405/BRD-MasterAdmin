@@ -1,17 +1,20 @@
-from rest_framework.routers import DefaultRouter
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from .views import (
-    LoanProductViewSet, ChargeMasterViewSet,
-    DocumentTypeViewSet, NotificationTemplateViewSet,
-    RoleMasterViewSet
+    ChargeMasterViewSet,
+    DocumentTypeViewSet,
+    LoanProductViewSet,
+    NotificationTemplateViewSet,
+    RoleMasterViewSet,
 )
 
 router = DefaultRouter()
-router.register(r'loan-products', LoanProductViewSet)
 router.register(r'charges', ChargeMasterViewSet)
 router.register(r'document-types', DocumentTypeViewSet)
+router.register(r'loan-products', LoanProductViewSet)
 router.register(r'notification-templates', NotificationTemplateViewSet)
-router.register(r'roles', RoleMasterViewSet)
+router.register(r'role-masters', RoleMasterViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
