@@ -1,50 +1,35 @@
-// -------------------------------------
-// Option 2 Backend (LocalStorage now → Django Ready)
-// -------------------------------------
-
-const KEY = "loanProducts";
-
-const getLocal = () => JSON.parse(localStorage.getItem(KEY)) || [];
-const setLocal = (data) => localStorage.setItem(KEY, JSON.stringify(data));
+import api from "../utils/axiosInstance";
 
 export const loanProductService = {
-  // Get all products
-  getProducts() {
-    return getLocal();
-    // Django later:
-    // return api.get("/loan-products/");
+  
+  // GET all loan products
+  async getProducts() {
+    const response = await api.get("/adminpanel/loan-products/");
+    return response.data;
   },
 
-  // Add product
-  addProduct(name) {
-    const all = getLocal();
-
-    const newItem = {
-      id: Date.now(),
-      name: name.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    all.push(newItem);
-    setLocal(all);
-
-    return newItem;
+  // GET single product
+  async getProduct(id) {
+    const response = await api.get(`/adminpanel/loan-products/${id}/`);
+    return response.data;
   },
 
-  // Update product
-  updateProduct(id, name) {
-    const all = getLocal();
-    const updated = all.map((p) =>
-      p.id === id ? { ...p, name: name.trim() } : p
-    );
-    setLocal(updated);
-    return true;
+  // CREATE product
+  async createProduct(data) {
+    const response = await api.post("/adminpanel/loan-products/", data);
+    return response.data;
   },
 
-  // Delete product
-  deleteProduct(id) {
-    const updated = getLocal().filter((p) => p.id !== id);
-    setLocal(updated);
-    return true;
+  // UPDATE product
+  async updateProduct(id, data) {
+    const response = await api.put(`/adminpanel/loan-products/${id}/`, data);
+    return response.data;
   },
+
+  // DELETE product
+  async deleteProduct(id) {
+    const response = await api.delete(`/adminpanel/loan-products/${id}/`);
+    return response.data;
+  },
+
 };

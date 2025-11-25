@@ -1,60 +1,30 @@
-import { api } from "./api";
+import axios from "axios";
 
-const getLocal = (key) => JSON.parse(localStorage.getItem(key)) || [];
-const setLocal = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+const API_URL = "http://127.0.0.1:8000/api/token/";
 
 export const authService = {
-  
-  async login(email, password) {
-    const users = getLocal("registeredUsers");
+  login: async (email, password) => {
+    try {
+      const response = await axios.post(API_URL, {
+        email: email,
+        password: password,
+      });
 
-    const foundUser = users.find(
-      (u) => u.email === email && u.password === password
-    );
+      if (response.data?.access) {
+        localStorage.setItem("access_token", response.data.access);
+        localStorage.setItem("refresh_token", response.data.refresh);
+        localStorage.setItem("user_email", email);
 
-    if (!foundUser) return null;
+        return { email };
+      }
 
-    // save session
-    localStorage.setItem("token", "dummy_token_123");
-    localStorage.setItem("currentUser", JSON.stringify(foundUser));
-
-    return foundUser;
-
-    // Later Django:
-    // return api.post("/auth/login/", { email, password });
+      return null;
+    } catch (error) {
+      console.log("Login Error:", error);
+      return null;
+    }
   },
 
-  async recordLoginAttempt({ email, status }) {
-    const attempts = getLocal("loginAttempts");
-    const newLog = {
-      id: Date.now(),
-      email,
-      status,
-      time: new Date().toLocaleString(),
-    };
-
-    setLocal("loginAttempts", [newLog, ...attempts]);
-  },
-
-  async recordActivity(action, user) {
-    const logs = getLocal("userActivity");
-    const newLog = {
-      id: Date.now(),
-      action,
-      user,
-      time: new Date().toLocaleString(),
-    };
-    setLocal("userActivity", [newLog, ...logs]);
-  },
-  async signup(newUser) {
-  const users = getLocal("registeredUsers");
-  const updated = [...users, newUser];
-  setLocal("registeredUsers", updated);
-
-  return newUser;
-
-  // Later Django:
-  // return api.post("/auth/signup/", newUser);
-}
-
+  recordLoginAttempt: async () => {},
+  recordActivity: async () => {},
 };
