@@ -16,15 +16,15 @@ import CreateBranch from "./pages/organization/CreateBranch";
 import Departments from "./pages/organization/Departments";
 import AssignStaff from "./pages/organization/AssignStaff";
 import ModuleAccess from "./pages/organization/ModuleAccess";
-import ProtectedRoute from "./components/ProtectedRoute"; // we will create this
-import Users from "./pages/Users/Users";
-import AddUser from "./pages/Users/AddUser";
-import ResetPassword from "./pages/Users/ResetPassword";
-import ActivateDeactivate from "./pages/Users/ActivateDeactivate";
-import AssignUser from "./pages/Users/AssignUser";
-import UserActivity from "./pages/Users/UserActivity";
-import LoginAttempts from "./pages/Users/LoginAttempts";
-import UserList from "./pages/Users/UserList";
+// import ProtectedRoute from "./components/ProtectedRoute"; // we will create this
+import Users from "./pages/users/Users";
+import AddUser from "./pages/users/AddUser";
+import ResetPassword from "./pages/users/ResetPassword";
+import ActivateDeactivate from "./pages/users/ActivateDeactivate";
+import AssignUser from "./pages/users/AssignUser";
+import UserActivity from "./pages/users/UserActivity";
+import LoginAttempts from "./pages/users/LoginAttempts";
+import UserList from "./pages/users/UserList";
 // ROLE MANAGEMENT PAGES
 import Roles from "./pages/roles/Roles";
 import CreateRole from "./pages/roles/CreateRole";
@@ -71,11 +71,11 @@ import RevenueReport from "./pages/Reports/RevenueReport";
 import UserActivityReport from "./pages/Reports/UserActivityReport";
 import AuditMain from "./pages/audit/AuditMain";
 import ViewUserActions from "./pages/audit/ViewUserActions";
-import TrackEditsDeletes from "./pages/audit/TrackEditsDeletes;";
-import ActivityTimeline from "./pages/audit/ActivityTimeline;";
-import TrackIpLogs from "./pages/audit/TrackIpLogs;";
+import TrackEditsDeletes from "./pages/audit/TrackEditsDeletes";
+import ActivityTimeline from "./pages/audit/ActivityTimeline";
+import TrackIpLogs from "./pages/audit/TrackIpLogs";
 import BranchDataMonitor from "./pages/audit/BranchDataMonitor";
-import ProfilePage from "./components/ProfilePage;";
+import ProfilePage from "./components/ProfilePage";
 
 
 function App() {

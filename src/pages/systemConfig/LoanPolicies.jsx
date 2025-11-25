@@ -1,8 +1,16 @@
 // src/pages/systemConfig/LoanPolicies.jsx
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import { loanProductService } from "../../services/loanProductService";
-import { FiPlus, FiEdit, FiTrash } from "react-icons/fi";
+import loanPolicyService from "../../services/loanPolicyService";
+import {
+  FiArrowLeft,
+  FiSave,
+  FiAlertTriangle,
+  FiInfo,
+  FiSettings,
+} from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+
 
 const LoanPolicies = () => {
   const [products, setProducts] = useState([]);
