@@ -1,11 +1,12 @@
 from rest_framework.routers import DefaultRouter
+from django.urls import include, path
 from .views import TenantViewSet, BranchViewSet
-from django.urls import path, include
 
 router = DefaultRouter()
-router.register('tenants', TenantViewSet, basename='tenant')
-router.register('branches', BranchViewSet, basename='branch')
+router.register(r'', TenantViewSet, basename='tenants')
+router.register(r'branches', BranchViewSet, basename='branches')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
+    path("onboarding/", include("tenants.client_onboarding.urls")),
 ]

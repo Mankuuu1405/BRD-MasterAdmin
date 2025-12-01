@@ -18,4 +18,5 @@ router.register(r'role-masters', RoleMasterViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path("lead-management/", include("adminpanel.lead_management.urls")),
 ]

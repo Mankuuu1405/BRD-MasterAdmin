@@ -4,14 +4,11 @@ from .models import User, AuditLog, UserProfile
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-
-    # Fields to display in list page
     list_display = ('email', 'role', 'phone', 'tenant', 'is_active', 'created_at')
     list_filter = ('role', 'tenant', 'is_active')
-    search_fields = ('email', 'phone', 'role')
+    search_fields = ('email', 'phone')
     ordering = ('-created_at',)
 
-    # Fields shown when editing a user
     fieldsets = (
         ('Auth', {'fields': ('email', 'password')}),
         ('Personal Details', {'fields': ('phone',)}),
@@ -20,7 +17,6 @@ class UserAdmin(BaseUserAdmin):
         ('Timestamps', {'fields': ('created_at', 'updated_at')}),
     )
 
-    # Fields shown when creating a user
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -30,13 +26,11 @@ class UserAdmin(BaseUserAdmin):
 
     readonly_fields = ('created_at', 'updated_at')
 
-
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
     list_display = ('user', 'action_type', 'module', 'timestamp', 'ip_address')
     list_filter = ('action_type', 'module')
     readonly_fields = ('user', 'action_type', 'module', 'timestamp', 'ip_address')
-
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
