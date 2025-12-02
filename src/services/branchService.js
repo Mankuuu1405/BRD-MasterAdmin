@@ -1,83 +1,60 @@
-// ---------------------------------------------
-// Production-Ready Branch Service (Backend Ready)
-// LocalStorage mock until Django API completes
-// ---------------------------------------------
+import { api } from "./api";
 
-const LS_KEY = "branches";
-
-const getLocal = () => JSON.parse(localStorage.getItem(LS_KEY)) || [];
-const setLocal = (val) => localStorage.setItem(LS_KEY, JSON.stringify(val));
+const BASE_URL = "/api/v1/tenants/branches/";
 
 export const branchService = {
 
-  // -------------------------------------------------------------------
   // GET ALL BRANCHES
-  // -------------------------------------------------------------------
   async getBranches() {
-    return getLocal();
-
-    // Django later:
-    // return api.get("/branches/");
+    try {
+      const res = await api.get(BASE_URL);
+      return res.data;
+    } catch (error) {
+      console.error("Fetch Branches Error:", error);
+      return [];
+    }
   },
 
-  // -------------------------------------------------------------------
-  // GET BRANCHES BY ORGANIZATION (Used in AssignStaff, ModuleAccess)
-  // -------------------------------------------------------------------
+  // GET BRANCHES BY ORGANIZATION
   async getBranchesByOrg(orgId) {
-    const list = getLocal();
-    return list.filter((b) => b.organizationId == orgId);
-
-    // Django later:
-    // return api.get(`/branches/?organization=${orgId}`);
+    try {
+      const res = await api.get(BASE_URL, { tenant: orgId });
+      return res.data;
+    } catch (error) {
+      return [];
+    }
   },
 
-  // -------------------------------------------------------------------
   // ADD NEW BRANCH
-  // -------------------------------------------------------------------
   async addBranch(payload) {
-    const list = getLocal();
-
-    const newBranch = {
-      id: Date.now(),
-      organizationId: payload.organizationId,
-      organizationName: payload.organizationName || "",
-      name: payload.name,
-      address: payload.address,
-      contactPerson: payload.contactPerson,
-      phone: payload.phone,
-    };
-
-    list.push(newBranch);
-    setLocal(list);
-    return newBranch;
-
-    // Django:
-    // return api.post("/branches/", payload);
+    try {
+      // Backend expects 'tenant' ID, mapping organizationId to tenant
+      const data = { ...payload, tenant: payload.organizationId };
+      const res = await api.post(BASE_URL, data);
+      return res.data;
+    } catch (error) {
+      console.error("Add Branch Error:", error);
+      throw error;
+    }
   },
 
-  // -------------------------------------------------------------------
-  // UPDATE BRANCH (future use)
-  // -------------------------------------------------------------------
+  // UPDATE BRANCH
   async updateBranch(id, updatedValues) {
-    const list = getLocal().map((b) =>
-      b.id === id ? { ...b, ...updatedValues } : b
-    );
-    setLocal(list);
-    return true;
-
-    // Django:
-    // return api.put(`/branches/${id}/`, updatedValues);
+    try {
+      const res = await api.patch(`${BASE_URL}${id}/`, updatedValues);
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
   },
 
-  // -------------------------------------------------------------------
-  // DELETE BRANCH (future: add confirm + check dependencies)
-  // -------------------------------------------------------------------
+  // DELETE BRANCH
   async deleteBranch(id) {
-    const list = getLocal().filter((b) => b.id !== id);
-    setLocal(list);
-    return true;
-
-    // Django:
-    // return api.delete(`/branches/${id}/`);
+    try {
+      await api.delete(`${BASE_URL}${id}/`);
+      return true;
+    } catch (error) {
+      return false;
+    }
   },
 };

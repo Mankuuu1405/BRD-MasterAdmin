@@ -1,83 +1,69 @@
-// -------------------------------------
-// LocalStorage Backend (Option 2)
-// Future: Switch to Django without UI changes
-// -------------------------------------
+import { api } from "./api";
 
-const getLocal = (key) => JSON.parse(localStorage.getItem(key)) || [];
-const setLocal = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-
-const ROLE_KEY = "roles";
-const ROLE_PERMISSION_KEY = "rolePermissions";
+const BASE_URL = "/api/v1/adminpanel/role-masters/";
 
 export const roleService = {
 
-  // -----------------------------
-  // GET ALL ROLES (SYNC)
-  // -----------------------------
-  getRoles() {
-    return getLocal(ROLE_KEY) || [];
-    // Later Django:
-    // return (await api.get("/roles/")).data;
-  },
-
-  // -----------------------------
-  // ADD ROLE (SYNC)
-  // -----------------------------
-  addRole(roleName) {
-    const roles = getLocal(ROLE_KEY);
-
-    const newRole = {
-      id: Date.now(),
-      roleName: roleName.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    roles.push(newRole);
-    setLocal(ROLE_KEY, roles);
-
-    return newRole;
-  },
-
-  // -----------------------------
-  // SAVE PERMISSIONS for ROLE (SYNC)
-  // -----------------------------
-  savePermissions(roleId, permissions) {
-    let all = getLocal(ROLE_PERMISSION_KEY);
-
-    const existingIndex = all.findIndex((p) => p.roleId === roleId);
-
-    if (existingIndex >= 0) {
-      all[existingIndex].permissions = permissions;
-    } else {
-      all.push({ roleId, permissions });
+  // GET ALL ROLES
+  async getRoles() {
+    try {
+      const res = await api.get(BASE_URL);
+      return res.data.map(r => ({
+        id: r.id,
+        roleName: r.name,
+        description: r.description,
+        createdAt: r.created_at
+      }));
+    } catch (error) {
+      console.error("Fetch Roles Error:", error);
+      return [];
     }
-
-    setLocal(ROLE_PERMISSION_KEY, all);
-    return true;
   },
 
-  // -----------------------------
-  // GET PERMISSIONS for ROLE (SYNC)
-  // -----------------------------
-  getPermissions(roleId) {
-    const all = getLocal(ROLE_PERMISSION_KEY);
-    return all.find((p) => p.roleId === roleId)?.permissions || {};
+  // ADD ROLE
+  async addRole(roleName) {
+    try {
+      const res = await api.post(BASE_URL, { name: roleName });
+      return {
+        id: res.data.id,
+        roleName: res.data.name,
+        createdAt: res.data.created_at
+      };
+    } catch (error) {
+      throw error;
+    }
   },
 
-  // -------------------------------------------------------
-  // DELETE ROLE + REMOVE ITS PERMISSIONS (IMPORTANT FEATURE)
-  // -------------------------------------------------------
-  deleteRole(roleId) {
-    // 1. Remove from roles table
-    const updatedRoles = getLocal(ROLE_KEY).filter((r) => r.id !== roleId);
-    setLocal(ROLE_KEY, updatedRoles);
+  // SAVE PERMISSIONS
+  async savePermissions(roleId, permissions) {
+    // Backend endpoint needed for permissions. 
+    // Assuming a custom action or separate endpoint.
+    try {
+      await api.post(`${BASE_URL}${roleId}/permissions/`, { permissions });
+      return true;
+    } catch (error) {
+      console.warn("Permission save API not implemented on backend yet");
+      return false;
+    }
+  },
 
-    // 2. Remove its permissions mapping
-    const updatedPerms = getLocal(ROLE_PERMISSION_KEY).filter(
-      (p) => p.roleId !== roleId
-    );
-    setLocal(ROLE_PERMISSION_KEY, updatedPerms);
+  // GET PERMISSIONS
+  async getPermissions(roleId) {
+    try {
+      const res = await api.get(`${BASE_URL}${roleId}/permissions/`);
+      return res.data;
+    } catch (error) {
+      return {};
+    }
+  },
 
-    return true;
+  // DELETE ROLE
+  async deleteRole(roleId) {
+    try {
+      await api.delete(`${BASE_URL}${roleId}/`);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 };

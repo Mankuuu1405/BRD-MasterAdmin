@@ -1,35 +1,24 @@
-// ---------------------------
-// Option-2 LocalStorage Backend
-// ---------------------------
+import { api } from "./api";
 
-const KEY = "documentTemplates";
-
-const getLocal = () => JSON.parse(localStorage.getItem(KEY)) || [];
-const setLocal = (data) => localStorage.setItem(KEY, JSON.stringify(data));
+const BASE_URL = "/api/v1/adminpanel/document-types/";
 
 export const templateService = {
-  getTemplates() {
-    return getLocal();
+  async getTemplates() {
+    try {
+      const res = await api.get(BASE_URL);
+      return res.data;
+    } catch {
+      return [];
+    }
   },
 
-  addTemplate(template) {
-    const list = getLocal();
-    list.push(template);
-    setLocal(list);
-    return template;
+  async addTemplate(template) {
+    const res = await api.post(BASE_URL, template);
+    return res.data;
   },
 
-  updateTemplate(id, updated) {
-    const list = getLocal();
-    const idx = list.findIndex((t) => t.id === id);
-    list[idx] = { ...list[idx], ...updated };
-    setLocal(list);
-    return list[idx];
-  },
-
-  deleteTemplate(id) {
-    const updated = getLocal().filter((t) => t.id !== id);
-    setLocal(updated);
+  async deleteTemplate(id) {
+    await api.delete(`${BASE_URL}${id}/`);
     return true;
   }
 };

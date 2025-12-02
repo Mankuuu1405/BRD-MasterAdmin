@@ -1,78 +1,67 @@
-// Backend-ready Dashboard Service
-
-import { api } from "./api";
-
-// LocalStorage fallback helpers
-const getLocal = (key) => JSON.parse(localStorage.getItem(key)) || [];
-const setLocal = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+import { api } from "./api"; // Ensure api.js uses axiosInstance
 
 export const dashboardService = {
   
-  // DASHBOARD CARDS
+  // 1. DASHBOARD CARDS
   async getSummaryCards() {
-    const summary = {
-      totalOrganizations: 12,
-      totalBranches: 48,
-      activeUsers: 230,
-      activeLoans: 102,
-      dailyDisbursement: "₹1,54,000",
-      apiStatus: "All Good",
-      alerts: 3,
-    };
+    try {
+      const res = await api.get("/api/v1/dashboard/full");
+      const data = res.data?.kpis || {};
 
-    return summary;
-
-    // Later:
-    // return api.get("/dashboard/summary/");
+      return {
+        totalOrganizations: data.totalTenants || 0,
+        totalBranches: 0, 
+        activeUsers: data.activeUsers || 0,
+        activeLoans: data.totalLoans || 0,
+        dailyDisbursement: data.disbursedAmount || "₹0",
+        apiStatus: "Online",
+        alerts: 0,
+      };
+    } catch (error) {
+      console.error("Dashboard KPI Error:", error);
+      return {
+        totalOrganizations: 0, totalBranches: 0, activeUsers: 0,
+        activeLoans: 0, dailyDisbursement: "₹0", apiStatus: "Error", alerts: 0
+      };
+    }
   },
 
-  // LOAN TREND CHART
+  // 2. LOAN TREND CHART (Graph)
   async getLoanTrends() {
-    const data = [
-      { month: "Jan", loans: 50 },
-      { month: "Feb", loans: 75 },
-      { month: "Mar", loans: 60 },
-      { month: "Apr", loans: 90 },
-      { month: "May", loans: 120 },
-      { month: "Jun", loans: 140 },
-    ];
-    return data;
-
-    // Later:
-    // return api.get("/dashboard/loan-trends/");
+    try {
+      const res = await api.get("/api/v1/dashboard/full");
+      // Backend response example: { charts: { monthlyDisbursement: [{ month: 'Jan', amount: 5000 }] } }
+      const chartData = res.data?.charts?.monthlyDisbursement || [];
+      
+      // Ensure data format matches Recharts expectation
+      return chartData.map(item => ({
+        month: item.month,
+        amount: item.amount
+      }));
+    } catch (error) {
+      console.error("Graph Error:", error);
+      return [];
+    }
   },
 
-  // USERS PER BRANCH CHART
+  // 3. USERS PER BRANCH
   async getUsersPerBranch() {
-    const data = [
-      { branch: "Branch A", users: 45 },
-      { branch: "Branch B", users: 70 },
-      { branch: "Branch C", users: 55 },
-      { branch: "Branch D", users: 90 },
-    ];
-    return data;
-
-    // Later:
-    // return api.get("/dashboard/users-per-branch/");
+    // Placeholder until branch API is ready
+    return []; 
   },
 
-  // RECENT ACTIVITIES
+  // 4. RECENT ACTIVITIES
   async getActivities() {
-    return getLocal("userActivity");
-
-    // Later:
-    // return api.get("/dashboard/recent-activities/");
+    try {
+      const res = await api.get("/api/v1/dashboard/full");
+      return res.data?.charts?.recentActivity || [];
+    } catch (error) {
+      return [];
+    }
   },
 
-  // ALERTS
+  // 5. ALERTS
   async getAlerts() {
-    return getLocal("alerts") || [
-      { id: 1, type: "Critical", msg: "API latency increased", time: "5 min ago" },
-      { id: 2, type: "Warning", msg: "Loan approval queue pending", time: "20 min ago" },
-      { id: 3, type: "Info", msg: "System running normally", time: "1 hour ago" },
-    ];
-
-    // Later:
-    // return api.get("/dashboard/alerts/");
+    return [];
   },
 };
