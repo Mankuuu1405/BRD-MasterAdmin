@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function LoanPolicyService() {
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "http://127.0.0.1:8000/api/adminpanel/loan-products/";
+  const API_URL = "/api/adminpanel/loan-products/";
 
   useEffect(() => {
     fetchLoanPolicies();
@@ -13,13 +13,7 @@ export default function LoanPolicyService() {
 
   const fetchLoanPolicies = async () => {
     try {
-      const token = localStorage.getItem("access"); // stored during login
-
-      const response = await axios.get(API_URL, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axiosInstance.get(API_URL);
 
       setPolicies(response.data);
       setLoading(false);

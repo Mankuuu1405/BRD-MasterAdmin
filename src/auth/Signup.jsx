@@ -68,17 +68,29 @@ const Signup = () => {
       createdAt: new Date().toLocaleString()
     };
 
-    // Save user (Backend-Ready)
-    await authService.signup(newUser);
+    try {
+      // Save user (Backend-Ready)
+      const result = await authService.signup(newUser);
 
-    // Record activity
-    await authService.recordActivity(
-      "New account created",
-      newUser.email
-    );
+      // Record activity
+      await authService.recordActivity(
+        "New account created",
+        newUser.email
+      );
 
-    alert("Account created successfully!");
-    navigate("/login");
+      setLoading(false);
+      alert("Account created successfully! Please login with your credentials.");
+      navigate("/login");
+    } catch (error) {
+      console.error("Signup error:", error);
+      setLoading(false);
+      const errorMessage = error.response?.data?.email?.[0] || 
+                          error.response?.data?.password?.[0] ||
+                          error.response?.data?.detail ||
+                          error.message ||
+                          "Failed to create account. Please try again.";
+      alert(errorMessage);
+    }
   };
 
   return (

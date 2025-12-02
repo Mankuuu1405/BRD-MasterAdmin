@@ -1,13 +1,7 @@
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 
-const API_URL = "http://127.0.0.1:8000/api/adminpanel/loan-products/";
+const API_URL = "/api/adminpanel/loan-products/";
 
 export const getLoanPolicies = async () => {
-    const token = localStorage.getItem("access");
-
-    return await axios.get(API_URL, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+    return await axiosInstance.get(API_URL);
 };

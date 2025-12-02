@@ -1,6 +1,28 @@
-# React + Vite
+# BRD Master Admin Panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite application for BRD Master Admin Panel.
+
+## Environment Configuration
+
+To connect to the BRD backend, create a `.env` file in the root directory with the following:
+
+```env
+VITE_API_BASE_URL=http://your-brd-backend-url:port
+```
+
+For example:
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+Or for production:
+```env
+VITE_API_BASE_URL=https://api.brd-backend.com
+```
+
+The application will use this URL for all API requests. If not set, it defaults to `http://127.0.0.1:8000`.
+
+## Getting Started
 
 Currently, two official plugins are available:
 

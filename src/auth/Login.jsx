@@ -26,19 +26,28 @@ const Login = () => {
 
     const { email, password } = formData;
 
-    const user = await authService.login(email, password);
+    try {
+      const user = await authService.login(email, password);
 
-    if (!user) {
-      await authService.recordLoginAttempt({ email, status: "Failed" });
-      alert("Invalid email or password!");
+      if (!user) {
+        await authService.recordLoginAttempt({ email, status: "Failed" });
+        alert("Invalid email or password!");
+        setLoading(false);
+        return;
+      }
+
+      await authService.recordLoginAttempt({ email, status: "Success" });
+      await authService.recordActivity("Logged in", user.email);
+
       setLoading(false);
-      return;
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      await authService.recordLoginAttempt({ email, status: "Failed" });
+      setLoading(false);
+      const errorMessage = error.message || "Invalid email or password. Please try again.";
+      alert(errorMessage);
     }
-
-    await authService.recordLoginAttempt({ email, status: "Success" });
-    await authService.recordActivity("Logged in", user.email);
-
-    navigate("/dashboard");
   };
 
   return (
