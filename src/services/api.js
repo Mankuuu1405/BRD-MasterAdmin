@@ -1,9 +1,11 @@
-// Dummy axios wrapper for future Django backend integration
-// For now, no API calls will be made.
+// src/services/api.js
+// ✅ Now integrated with your configured Axios Instance
+import axiosInstance from "../utils/axiosInstance";
 
 export const api = {
-  get: () => Promise.resolve({ data: [] }),
-  post: () => Promise.resolve({ data: [] }),
-  put: () => Promise.resolve({ data: [] }),
-  delete: () => Promise.resolve({ data: [] }),
+  get: (url, params) => axiosInstance.get(url, { params }),
+  post: (url, data) => axiosInstance.post(url, data),
+  put: (url, data) => axiosInstance.put(url, data),
+  patch: (url, data) => axiosInstance.patch(url, data), // Added PATCH support
+  delete: (url) => axiosInstance.delete(url),
 };

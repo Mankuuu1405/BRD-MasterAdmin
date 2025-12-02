@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -12,74 +11,16 @@ import {
   Cell
 } from "recharts";
 
-/* -----------------------------------------
-   TIME BASED ACTIVE USER DATASETS
------------------------------------------- */
+const ActiveUserChart = ({ usersPerBranch }) => {
+  // Backend se data 'usersPerBranch' prop ke zariye aayega
+  const [chartData, setChartData] = useState([]);
+  const [filter, setFilter] = useState("week"); // Filter UI ke liye, par abhi data backend se raw aayega
 
-// Active Users This Week (Daily)
-const thisWeekData = [
-  { label: "Mon", users: 40 },
-  { label: "Tue", users: 55 },
-  { label: "Wed", users: 60 },
-  { label: "Thu", users: 45 },
-  { label: "Fri", users: 70 },
-  { label: "Sat", users: 65 },
-  { label: "Sun", users: 50 },
-];
-
-// Active Users This Month (Weekly)
-const thisMonthData = [
-  { label: "Week 1", users: 180 },
-  { label: "Week 2", users: 220 },
-  { label: "Week 3", users: 260 },
-  { label: "Week 4", users: 300 },
-];
-
-// Last Month (Weekly)
-const lastMonthData = [
-  { label: "Week 1", users: 150 },
-  { label: "Week 2", users: 200 },
-  { label: "Week 3", users: 230 },
-  { label: "Week 4", users: 260 },
-];
-
-// This Year (Monthly)
-const thisYearData = [
-  { label: "Jan", users: 900 },
-  { label: "Feb", users: 1100 },
-  { label: "Mar", users: 1200 },
-  { label: "Apr", users: 1300 },
-  { label: "May", users: 1500 },
-  { label: "Jun", users: 1700 },
-  { label: "Jul", users: 1600 },
-  { label: "Aug", users: 1800 },
-  { label: "Sep", users: 1900 },
-  { label: "Oct", users: 2100 },
-  { label: "Nov", users: 2200 },
-  { label: "Dec", users: 2400 },
-];
-
-const ActiveUsersChart = () => {
-  const [filter, setFilter] = useState("week");
-
-  const getFilteredData = () => {
-    switch (filter) {
-      case "week":
-        return thisWeekData;
-
-      case "month":
-        return thisMonthData;
-
-      case "lastMonth":
-        return lastMonthData;
-
-      case "year":
-        return thisYearData;
-
-      default:
-        return thisWeekData;
+  useEffect(() => {
+    if (usersPerBranch && usersPerBranch.length > 0) {
+      setChartData(usersPerBranch);
     }
-  };
+  }, [usersPerBranch]);
 
   // Auto-color logic
   const getColor = (value) => {
@@ -89,7 +30,7 @@ const ActiveUsersChart = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow ">
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
       
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
@@ -97,7 +38,7 @@ const ActiveUsersChart = () => {
           Active Users Analytics
         </h2>
 
-        {/* Filter Dropdown */}
+        {/* Filter Dropdown (Optional: Backend logic required for real filtering) */}
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -105,29 +46,36 @@ const ActiveUsersChart = () => {
         >
           <option value="week">This Week</option>
           <option value="month">This Month</option>
-          <option value="lastMonth">Last Month</option>
           <option value="year">This Year</option>
         </select>
       </div>
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={getFilteredData()}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="label" />
+          <XAxis dataKey="label" /> {/* Backend should send 'label' (e.g. Mon, Tue or Branch A) */}
           <YAxis />
-          <Tooltip />
+          <Tooltip 
+            contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+          />
           <Legend />
 
-          <Bar dataKey="users" radius={[8, 8, 0, 0]}>
-            {getFilteredData().map((entry, index) => (
-              <Cell key={index} fill={getColor(entry.users)} />
+          <Bar dataKey="users" radius={[8, 8, 0, 0]} name="Active Users">
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={getColor(entry.users || 0)} />
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+
+      {(!chartData || chartData.length === 0) && (
+        <div className="text-center text-gray-400 text-sm mt-4">
+          No user activity data available from backend
+        </div>
+      )}
     </div>
   );
 };
 
-export default ActiveUsersChart;
+export default ActiveUserChart;

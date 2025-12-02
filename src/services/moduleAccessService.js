@@ -1,38 +1,28 @@
-// Backend-ready service layer for Module Access (Option 2)
+import { api } from "./api";
 
-const getLocal = (key) => JSON.parse(localStorage.getItem(key)) || [];
-const setLocal = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+const BASE_URL = "/api/v1/adminpanel/module-access/";
 
 export const moduleAccessService = {
-  
-  // Add module access
   async add(payload) {
-    const list = getLocal("moduleAccess");
-    const newItem = { id: Date.now(), ...payload };
-    list.push(newItem);
-    setLocal("moduleAccess", list);
-
-    return newItem;
-    // Django later:
-    // return api.post("/module-access/", payload);
+    const res = await api.post(BASE_URL, payload);
+    return res.data;
   },
 
-  // Update module access
   async update(id, payload) {
-    let list = getLocal("moduleAccess");
-    list = list.map((item) => (item.id === id ? { ...item, ...payload } : item));
-    setLocal("moduleAccess", list);
+    const res = await api.patch(`${BASE_URL}${id}/`, payload);
+    return res.data;
   },
 
-  // Delete
   async remove(id) {
-    let list = getLocal("moduleAccess");
-    list = list.filter((i) => i.id !== id);
-    setLocal("moduleAccess", list);
+    await api.delete(`${BASE_URL}${id}/`);
   },
 
-  // Get all
   async getAll() {
-    return getLocal("moduleAccess");
+    try {
+      const res = await api.get(BASE_URL);
+      return res.data;
+    } catch {
+      return [];
+    }
   },
 };

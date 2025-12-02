@@ -1,40 +1,26 @@
-// -----------------------------------------
-// Option 2 - LocalStorage backend (Django Ready)
-// -----------------------------------------
+import { api } from "./api";
 
-const KEY = "interest_settings";
-
-const getLocal = () => JSON.parse(localStorage.getItem(KEY)) || {};
-const setLocal = (data) => localStorage.setItem(KEY, JSON.stringify(data));
+// Using ChargeMaster for fees/interest related settings
+const BASE_URL = "/api/v1/adminpanel/charges/"; 
 
 export const interestService = {
-  // GET settings
-  getSettings() {
-    return getLocal();
+  async getSettings() {
+    try {
+      const res = await api.get(BASE_URL);
+      // You might need to transform this list into the structure your UI expects
+      return { roiSlabs: res.data }; 
+    } catch (error) {
+      return {};
+    }
   },
 
-  // SAVE main settings
-  saveSettings(data) {
-    const existing = getLocal();
-    const updated = { ...existing, ...data };
-    setLocal(updated);
-    return updated;
+  async saveSettings(data) {
+    // This might require a specific endpoint if 'settings' is a single object
+    try {
+      const res = await api.post(BASE_URL, data);
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
   },
-
-  // ADD ROI Slab
-  addRoiSlab(slab) {
-    const data = getLocal();
-    const slabs = data.roiSlabs || [];
-    slabs.push({ id: Date.now(), ...slab });
-    setLocal({ ...data, roiSlabs: slabs });
-    return slabs;
-  },
-
-  // DELETE ROI Slab
-  deleteRoiSlab(id) {
-    const data = getLocal();
-    const updated = (data.roiSlabs || []).filter((s) => s.id !== id);
-    setLocal({ ...data, roiSlabs: updated });
-    return updated;
-  }
 };
