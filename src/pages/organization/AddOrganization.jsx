@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import { FiArrowLeft, FiSave, FiUploadCloud } from "react-icons/fi";
+import { FiArrowLeft, FiSave } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { organizationService } from "../../services/organizationService";
 
@@ -8,31 +8,35 @@ export default function AddOrganization() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    name: "",
+    business_name: "",
+    email: "",
+    mobile_no: "",
     address: "",
     contact_person: "",
-    phone: "",
-    email: "",
-    gst_number: "",
-    pan_number: "",
-    business_type: "",
-    registration_no: "",
-    loan_prefix: "",
-    is_active: true,
+    loan_product: [],
+    password: "",
+    gst_in: "",
+    pan: "",
+    cin: "",
+    isVerified: false,
+    isDeleted: false,
+    created_user: "master_admin",
+    modified_user: "master_admin",
   });
 
-  const [logo, setLogo] = useState(null);
-  const [logoPreview, setLogoPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    setLogo(file);
-    setLogoPreview(URL.createObjectURL(file));
+  const handleLoanProducts = (e) => {
+    const value = e.target.value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item !== "");
+    setForm({ ...form, loan_product: value });
   };
 
   const handleSubmit = async (e) => {
@@ -41,13 +45,16 @@ export default function AddOrganization() {
     setErrors(null);
 
     try {
-      const payload = { ...form, logo: logo ? logo.name : null };
+      const payload = {
+        ...form,
+        loan_product: form.loan_product || [],
+      };
 
       await organizationService.addOrganization(payload);
 
       navigate("/organization");
     } catch (err) {
-      setErrors("Something went wrong while saving.");
+      setErrors("Something went wrong while saving organization.");
     } finally {
       setLoading(false);
     }
@@ -74,7 +81,7 @@ export default function AddOrganization() {
         </div>
       </div>
 
-      {/* FORM CONTAINER */}
+      {/* FORM */}
       <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm max-w-4xl">
 
         {errors && (
@@ -89,34 +96,11 @@ export default function AddOrganization() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
             <InputField
-              label="Organization Name *"
-              name="name"
+              label="Business Name *"
+              name="business_name"
               placeholder="ABC Finance Pvt Ltd"
-              value={form.name}
+              value={form.business_name}
               onChange={handleChange}
-              required
-            />
-
-            <SelectField
-              label="Business Type *"
-              name="business_type"
-              value={form.business_type}
-              onChange={handleChange}
-              required
-              options={[
-                "NBFC",
-                "Micro Finance",
-                "Cooperative Society",
-                "Private Lender",
-              ]}
-            />
-
-            <InputField
-              label="Contact Person *"
-              name="contact_person"
-              value={form.contact_person}
-              onChange={handleChange}
-              placeholder="Rahul Sharma"
               required
             />
 
@@ -124,60 +108,72 @@ export default function AddOrganization() {
               label="Email Address *"
               name="email"
               type="email"
-              placeholder="support@abcfinance.com"
+              placeholder="example@company.com"
               value={form.email}
               onChange={handleChange}
               required
             />
 
             <InputField
-              label="Phone Number *"
-              name="phone"
-              placeholder="+91 98765 43210"
-              value={form.phone}
+              label="Mobile Number *"
+              name="mobile_no"
+              placeholder="9876543210"
+              value={form.mobile_no}
               onChange={handleChange}
               required
             />
 
             <InputField
-              label="Registration No / CIN"
-              name="registration_no"
-              placeholder="U12345MH2019PTC123456"
-              value={form.registration_no}
+              label="Contact Person *"
+              name="contact_person"
+              placeholder="Rahul Sharma"
+              value={form.contact_person}
               onChange={handleChange}
+              required
+            />
+
+            <InputField
+              label="Password *"
+              name="password"
+              type="password"
+              placeholder="Set login password"
+              value={form.password}
+              onChange={handleChange}
+              required
             />
 
             <InputField
               label="GST Number"
-              name="gst_number"
+              name="gst_in"
               placeholder="22AAAAA0000A1Z5"
-              maxLength={15}
-              value={form.gst_number}
+              value={form.gst_in}
               onChange={handleChange}
+              maxLength={15}
             />
 
             <InputField
               label="PAN Number"
-              name="pan_number"
+              name="pan"
               placeholder="ABCDE1234F"
-              maxLength={10}
-              value={form.pan_number}
+              value={form.pan}
               onChange={handleChange}
+              maxLength={10}
             />
 
             <InputField
-              label="Loan ID Prefix *"
-              name="loan_prefix"
-              placeholder="ABC"
-              value={form.loan_prefix}
+              label="CIN Number"
+              name="cin"
+              placeholder="U12345MH2020PTC123456"
+              value={form.cin}
               onChange={handleChange}
-              required
             />
           </div>
 
           {/* ADDRESS */}
           <div>
-            <label className="text-gray-700 text-sm font-medium">Full Address *</label>
+            <label className="text-gray-700 text-sm font-medium">
+              Full Address *
+            </label>
             <textarea
               name="address"
               value={form.address}
@@ -188,35 +184,14 @@ export default function AddOrganization() {
             />
           </div>
 
-          {/* LOGO UPLOAD */}
+          {/* LOAN PRODUCTS */}
           <div>
-            <label className="text-gray-700 text-sm font-medium">Company Logo</label>
-            <div className="mt-3 flex items-center gap-4">
-              <label className="px-4 py-3 rounded-xl bg-gray-50 border border-dashed border-gray-300 cursor-pointer hover:bg-gray-100 flex items-center gap-2 text-sm text-gray-700">
-                <FiUploadCloud className="text-gray-600 text-lg" />
-                <span>Upload Logo</span>
-                <input type="file" hidden accept="image/*" onChange={handleLogoChange} />
-              </label>
-
-              {logoPreview && (
-                <img
-                  src={logoPreview}
-                  alt="Logo Preview"
-                  className="h-16 w-16 rounded-xl border border-gray-200 shadow-sm object-cover"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* ACTIVE STATUS */}
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={form.is_active}
-              onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-              className="w-5 h-5"
+            <InputField
+              label="Loan Products (comma separated) *"
+              name="loan_product"
+              placeholder="Gold Loan, Personal Loan"
+              onChange={handleLoanProducts}
             />
-            <label className="text-gray-700 text-sm font-medium">Active Organization</label>
           </div>
 
           {/* SUBMIT BUTTON */}
@@ -228,7 +203,6 @@ export default function AddOrganization() {
             <FiSave className="text-lg" />
             {loading ? "Saving..." : "Save Organization"}
           </button>
-
         </form>
       </div>
     </MainLayout>
@@ -244,26 +218,6 @@ function InputField({ label, ...props }) {
         {...props}
         className="w-full mt-2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white outline-none text-sm"
       />
-    </div>
-  );
-}
-
-/* ---------------- SELECT FIELD ---------------- */
-function SelectField({ label, options = [], ...props }) {
-  return (
-    <div>
-      <label className="text-gray-700 text-sm font-medium">{label}</label>
-      <select
-        {...props}
-        className="w-full mt-2 p-3 rounded-xl bg-gray-50 border border-gray-200 outline-none text-sm"
-      >
-        <option value="">Select option</option>
-        {options.map((op, i) => (
-          <option key={i} value={op}>
-            {op}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }

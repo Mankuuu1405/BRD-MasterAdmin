@@ -27,7 +27,7 @@ const Sidebar = () => {
     location.pathname === path || location.pathname.startsWith(path);
 
   const menuItemStyle = (path) =>
-    `flex items-center gap-3 px-4 py-2.5 rounded-xl text-xl transition-all
+    `flex items-center gap-3 px-4 py-2.5 rounded-xl text-md transition-all
      ${
        isActive(path)
          ? "bg-[#E8F1FF] text-[#0A66FF] font-medium"
@@ -90,6 +90,9 @@ const Sidebar = () => {
           </Link>
            <Link to="/audit" className={menuItemStyle("/audit")}>
             <FiBarChart2 size={18} /> Audit
+          </Link>
+           <Link to="/subscription" className={menuItemStyle("/audit")}>
+            <FiBarChart2 size={18} /> subscription
           </Link>
 
         </nav>
