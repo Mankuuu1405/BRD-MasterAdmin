@@ -76,6 +76,11 @@ import ActivityTimeline from "./pages/audit/ActivityTimeline";
 import TrackIpLogs from "./pages/audit/TrackIpLogs";
 import BranchDataMonitor from "./pages/audit/BranchDataMonitor";
 import ProfilePage from "./components/ProfilePage";
+// import CouponPage from "./pages/subscription/CouponPage";
+// import SubscribersPage from "./pages/subscription/SubscribersPage";
+// import EmploymentTypePage from "./pages/subscription/EmploymentTypePage";
+import OccupationTypePage from "./pages/subscription/OccupationTypePage";
+import SubscriptionHome from "./pages/subscription/SubscriptionHome";
 
 
 function App() {
@@ -171,7 +176,7 @@ function App() {
           <Route path="/audit/ip-logs" element={<TrackIpLogs />} />
           <Route path="/audit/branch-data" element={<BranchDataMonitor />} />
           
-
+          <Route path="/subscription" element={<SubscriptionHome />} />
 
       </Routes>
     </Router>
