@@ -6,12 +6,10 @@ import {
   FiArrowLeft,
   FiSearch,
   FiTrash2,
-  FiToggleLeft,
-  FiToggleRight,
+  FiEdit3,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useUsers } from "../../hooks/useUsers";
-import { userService } from "../../services/userService";
 
 const UserList = () => {
   const navigate = useNavigate();
@@ -21,49 +19,43 @@ const UserList = () => {
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
-  // ---------------------------------------------------------
-  // FILTERED USERS
-  // ---------------------------------------------------------
-  const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
-      const q = search.toLowerCase();
+  // FILTER USERS
+const filteredUsers = useMemo(() => {
+  return users.filter((u) => {
+    // ❌ Skip MASTER_ADMIN completely
+    if (u.role === "MASTER_ADMIN") return false;
 
-      const matchesSearch =
-        !q ||
-        u.fullName?.toLowerCase().includes(q) ||
-        u.username?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q) ||
-        u.phone?.toLowerCase().includes(q);
+    const q = search.toLowerCase();
 
-      const matchesRole =
-        roleFilter === "ALL" ||
-        (u.role || "").toLowerCase() === roleFilter.toLowerCase();
+    const matchesSearch =
+      !q ||
+      u.email?.toLowerCase().includes(q) ||
+      u.phone?.toLowerCase().includes(q) ||
+      (u.role || "").toLowerCase().includes(q);
 
-      const matchesStatus =
-        statusFilter === "ALL" ||
-        (u.status || "").toLowerCase() === statusFilter.toLowerCase();
+    const matchesRole =
+      roleFilter === "ALL" ||
+      (u.role || "").toLowerCase() === roleFilter.toLowerCase();
 
-      return matchesSearch && matchesRole && matchesStatus;
-    });
-  }, [users, search, roleFilter, statusFilter]);
+    const matchesStatus =
+      statusFilter === "ALL" ||
+      (u.is_active ? "active" : "inactive") === statusFilter.toLowerCase();
 
-  // ---------------------------------------------------------
-  // ACTIONS
-  // ---------------------------------------------------------
-  const handleToggleStatus = async (id) => {
-    await userService.toggleUserStatus(id); // FIXED
-    reload();
-  };
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+}, [users, search, roleFilter, statusFilter]);
 
+
+  // DELETE USER
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
-    await userService.deleteUser(id); // FIXED
+    await userService.deleteUser(id);
     reload();
   };
 
   return (
     <MainLayout>
-      {/* ------------------ HEADER ------------------ */}
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <button
@@ -76,7 +68,7 @@ const UserList = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-800">User List</h1>
             <p className="text-gray-500 text-sm">
-              View and manage all registered users in the system.
+              View and manage all registered users.
             </p>
           </div>
         </div>
@@ -89,14 +81,14 @@ const UserList = () => {
         </button>
       </div>
 
-      {/* ------------------ FILTER BAR ------------------ */}
+      {/* FILTER BAR */}
       <div className="bg-white p-4 rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
         {/* Search */}
         <div className="flex items-center gap-2 w-full md:max-w-md">
           <FiSearch className="text-gray-400" />
           <input
             type="text"
-            placeholder="Search by name, email, username or phone..."
+            placeholder="Search by email, phone or role..."
             className="flex-1 bg-gray-50 rounded-xl px-3 py-2 outline-none"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -111,10 +103,10 @@ const UserList = () => {
             className="px-3 py-2 rounded-xl bg-gray-50 text-sm outline-none"
           >
             <option value="ALL">All Roles</option>
-            <option value="Admin">Admin</option>
-            <option value="Branch Manager">Branch Manager</option>
-            <option value="Loan Officer">Loan Officer</option>
-            <option value="Field Staff">Field Staff</option>
+            <option value="ADMIN">Admin</option>
+            <option value="BRANCH_MANAGER">Branch Manager</option>
+            <option value="LOAN_OFFICER">Loan Officer</option>
+            <option value="FIELD_STAFF">Field Staff</option>
           </select>
 
           <select
@@ -129,7 +121,7 @@ const UserList = () => {
         </div>
       </div>
 
-      {/* ------------------ CONTENT LIST ------------------ */}
+      {/* USER LIST */}
       <div className="bg-white p-6 rounded-2xl shadow-md">
         {loading ? (
           <p className="text-gray-500 text-center py-8 text-sm">
@@ -137,7 +129,7 @@ const UserList = () => {
           </p>
         ) : filteredUsers.length === 0 ? (
           <p className="text-gray-500 text-center py-8 text-sm">
-            No users found. Try changing filters or add a new user.
+            No users found.
           </p>
         ) : (
           <div className="space-y-3">
@@ -146,50 +138,40 @@ const UserList = () => {
                 key={user.id}
                 className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition"
               >
-                {/* LEFT: Info */}
+                {/* LEFT SECTION */}
                 <div>
-                  <p className="font-semibold text-gray-800">
-                    {user.fullName || "Unnamed User"}
-                  </p>
-                  <p className="text-gray-500 text-sm">
-                    {user.username && <span>{user.username} • </span>}
-                    {user.email}
-                  </p>
+                  <p className="font-semibold text-gray-800">{user.email}</p>
                   <p className="text-gray-500 text-xs mt-1">
-                    {user.role || "Role not set"}
+                    {user.phone || "No phone"}
                   </p>
-                  <p className="text-gray-400 text-xs mt-1">
-                    {user.organizationName
-                      ? `${user.organizationName} → ${
-                          user.branchName || "-"
-                        } → ${user.departmentName || "-"}`
-                      : "No org/branch/department linked"}
+                  <p className="text-gray-600 text-sm mt-1">
+                    Role: {user.role || "Not Set"}
                   </p>
                 </div>
 
-                {/* RIGHT: Actions */}
+                {/* RIGHT SECTION */}
                 <div className="flex items-center gap-3 justify-between md:justify-end">
+                  
+                  {/* Status Badge */}
                   <span
                     className={`px-3 py-1 text-xs rounded-full ${
-                      user.status === "Active"
+                      user.is_active
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-600"
                     }`}
                   >
-                    {user.status}
+                    {user.is_active ? "Active" : "Inactive"}
                   </span>
 
+                  {/* Edit Button */}
                   <button
-                    onClick={() => handleToggleStatus(user.id)}
-                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition"
-                  >
-                    {user.status === "Active" ? (
-                      <FiToggleLeft className="text-red-500 text-2xl" />
-                    ) : (
-                      <FiToggleRight className="text-green-500 text-2xl" />
-                    )}
+                   onClick={() => navigate(`/users/edit/${user.id}`)}
+                    className="p-2 rounded-full bg-blue-200 hover:bg-blue-200 transition"
+                  ><FiEdit3 />
+                    
                   </button>
 
+                  {/* Delete Button */}
                   <button
                     onClick={() => handleDelete(user.id)}
                     className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition"

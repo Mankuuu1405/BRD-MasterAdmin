@@ -12,18 +12,18 @@ import ForgotPassword from "./auth/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import Organization from "./pages/organization/Organization";
 import AddOrganization from "./pages/organization/AddOrganization";
+import OrganizationList from "./pages/organization/OrganizationList";
+import BranchList from "./pages/organization/BranchList";
+import UpdateBranch from "./pages/organization/UpdateBranch"; 
 import CreateBranch from "./pages/organization/CreateBranch";
-import Departments from "./pages/organization/Departments";
-import AssignStaff from "./pages/organization/AssignStaff";
-import ModuleAccess from "./pages/organization/ModuleAccess";
+
+
+
 // import ProtectedRoute from "./components/ProtectedRoute"; // we will create this
 import Users from "./pages/Users/Users";
 import AddUser from "./pages/Users/AddUser";
-import ResetPassword from "./pages/Users/ResetPassword";
-import ActivateDeactivate from "./pages/Users/ActivateDeactivate";
-import AssignUser from "./pages/Users/AssignUser";
-import UserActivity from "./pages/Users/UserActivity";
-import LoginAttempts from "./pages/Users/LoginAttempts";
+import EditUser from "./pages/Users/EditUser";
+
 import UserList from "./pages/Users/UserList";
 // ROLE MANAGEMENT PAGES
 import Roles from "./pages/roles/Roles";
@@ -31,37 +31,6 @@ import CreateRole from "./pages/roles/CreateRole";
 import SetPermissions from "./pages/roles/SetPermissions";
 import AssignPermissions from "./pages/roles/AssignPermissions";
 
-import MasterData from "./pages/masterData/MasterData";
-import LoanProducts from "./pages/masterData/LoanProducts";
-import InterestSettings from "./pages/masterData/InterestSettings";
-import DocumentTemplates from "./pages/masterData/DocumentTemplates";
-import CreditScoring from "./pages/masterData/CreditScoring";
-
-import SystemConfig from "./pages/systemConfig/SystemConfig";
-import LoanPolicies from "./pages/systemConfig/loanPolicyService";
-import SecuritySettings from "./pages/systemConfig/SecuritySettings";
-import RepaymentRules from "./pages/systemConfig/RepaymentRules";
-import WorkflowMain from "./pages/workflow/WorkflowMain";
-import AssignSteps from "./pages/workflow/AssignSteps"
-import TimeLimits from "./pages/workflow/TimeLimits"
-import AutomaticEscalation from "./pages/workflow/AutomaticEscalation"
-import DefineWorkflowSteps from "./pages/workflow/DefineWorkflowSteps";
-import Notifications from "./pages/notifications/Notifications";
-import SmsTemplates from "./pages/notifications/SmsTemplates";
-import EmailTemplates from "./pages/notifications/EmailTemplates";
-import SetPushNotificationRules from "./pages/notifications/SetPushNotificationRules";
-import EmiReminders from "./pages/notifications/EmiReminders";
-import SetOverdueAlerts from "./pages/notifications/SetOverdueAlerts";
-import IntegrationManagement from "./pages/integration/IntegrationManagement";
-import ManagePaymentGateway from "./pages/integration/ManagePaymentGateway";
-import ManageCreditBureau from "./pages/integration/ManageCreditBureau";
-import ManageSmsEmailApi from "./pages/integration/ManageSmsEmailApi";
-import ManageAccountingErp from "./pages/integration/ManageAccountingErp"
-import SetEndpoints from "./pages/integration/SetEndPoints";
-import ManageCrm from "./pages/integration/ManageCrm";
-import AddApiKeys from "./pages/integration/AddApiKeys";
-import TestConnections from "./pages/integration/TestConnections";
-import MonitorStatus from "./pages/integration/MonitorStatus";
 import ReportingAnalytics from "./pages/Reports/ReportingAnalytics";
 import DailyDisbursementReport from "./pages/Reports/DailyDisbursementReport"
 import BranchPerformanceReport from "./pages/Reports/BranchPerformanceReport"
@@ -103,17 +72,19 @@ function App() {
         <Route path="/organizations" element={<Organization /> } />
         <Route path="/organization/add" element={<AddOrganization />} />
         <Route path="/organization/branches/create" element={<CreateBranch />} />
-        <Route path="/organization/departments" element={<Departments />} />
-        <Route path="/organization/staff-assign" element={<AssignStaff />} />
-        <Route path="/organization/module-access" element={<ModuleAccess />} />
+        <Route path="/organization/list" element={<OrganizationList /> } />
+       
+        <Route path="/organization/branches/list" element={<BranchList />} />
+        <Route path="/organization/branches/update/:id" element={<UpdateBranch />} />
+        <Route path="/organization/branches/create" element={<CreateBranch />} />
+
+
+
         <Route path="/users" element={<Users />} />
         <Route path="/users/add" element={<AddUser />} />
-        <Route path="/users/reset-password" element={<ResetPassword />} />
-        <Route path="/users/toggle-status" element={<ActivateDeactivate />} />
-        <Route path="/users/assign" element={<AssignUser />} />
-        <Route path="/users/login-attempts" element={<LoginAttempts />} />
-        <Route path="/users/activity" element={<UserActivity />} />
         <Route path="/users/list" element={<UserList />} />
+        <Route path="/users/edit/:id" element={<EditUser />} />
+
 
         <Route path="/roles" element={<Roles />} />
         <Route path="/roles/create" element={<CreateRole />} />
@@ -121,43 +92,6 @@ function App() {
         <Route path="/roles/assign-permissions" element={<AssignPermissions />} />
 
 
-        <Route path="master" element={<MasterData />} />
-        <Route path="master/loan-products" element={<LoanProducts />} />
-        <Route path="master/interest-settings" element={<InterestSettings />} />
-        <Route path="master/document-template" element={<DocumentTemplates />} />
-        <Route path="master/credit-scoring" element={<CreditScoring />} />
-
-        <Route path="system" element={<SystemConfig />} />
-        <Route path="system/policies" element={<LoanPolicies />} />
-        <Route path="system/security" element={<SecuritySettings />} />
-        <Route path="system/repayment" element={<RepaymentRules />} />
-
-
-        <Route path="/workflow" element={<WorkflowMain />} />
-        <Route path="/workflow/assign" element={<AssignSteps />} />
-        <Route path="/workflow/time-limits" element={<TimeLimits />} />
-        <Route path="/workflow/escalations" element={<AutomaticEscalation />} />
-        <Route path="/workflow/steps" element={<DefineWorkflowSteps />} />
-
-        
-        
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/notifications/sms-templates" element={<SmsTemplates />} />
-        <Route path="/notifications/email-templates" element={<EmailTemplates />} />
-        <Route path="/notifications/push-rules" element={<SetPushNotificationRules />} />
-        <Route path="/notifications/emi-reminders" element={<EmiReminders />} />
-        <Route path="/notifications/overdue-alerts" element={<SetOverdueAlerts />} />
-
-        <Route path="/integration" element={<IntegrationManagement />} />
-        <Route path="/integration/payment-gateway" element={<ManagePaymentGateway/>} />
-        <Route path="/integration/credit-bureau" element={<ManageCreditBureau/>} />
-        <Route path="/integration/sms-email-api" element={<ManageSmsEmailApi/>} />
-        <Route path="/integration/accounting-erp" element={<ManageAccountingErp/>} />
-        <Route path="/integration/crm" element={<ManageCrm/>} />
-        <Route path="/integration/endpoints" element={<SetEndpoints/>} />
-        <Route path="/integration/api-keys" element={<AddApiKeys/>} />
-        <Route path="/integration/test-connections" element={<TestConnections/>} />
-        <Route path="/integration/monitor-status" element={<MonitorStatus/>} />
 
        
           <Route path="/reports" element={<ReportingAnalytics />} />

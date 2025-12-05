@@ -13,7 +13,7 @@ const TimelineItem = ({ item, onDelete, onEdit }) => (
   <div className="relative pl-10 pb-10 group">
 
     {/* Line */}
-    <span className="absolute left-[13px] top-0 w-[2px] h-full bg-gray-300"></span>
+    <span className="absolute left-[13px] top-0 h-full bg-gray-300"></span>
 
     {/* Dot */}
     <span className="absolute left-2 top-1 w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow"></span>

@@ -7,10 +7,10 @@ export const dashboardService = {
     try {
       const res = await api.get("/api/v1/dashboard/full");
       const data = res.data?.kpis || {};
-
+      
       return {
         totalOrganizations: data.totalTenants || 0,
-        totalBranches: 0, 
+        totalBranches: data.totalBranches || 0, 
         activeUsers: data.activeUsers || 0,
         activeLoans: data.totalLoans || 0,
         dailyDisbursement: data.disbursedAmount || "₹0",

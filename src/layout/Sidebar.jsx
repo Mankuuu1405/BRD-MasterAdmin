@@ -5,11 +5,7 @@ import {
   FiGrid,
   FiUsers,
   FiKey,
-  FiSettings,
-  FiCpu,
-  FiGitBranch,
-  FiBell,
-  FiLayers,
+
   FiBarChart2,
   FiLogOut,
 } from "react-icons/fi";
@@ -27,7 +23,7 @@ const Sidebar = () => {
     location.pathname === path || location.pathname.startsWith(path);
 
   const menuItemStyle = (path) =>
-    `flex items-center gap-3 px-4 py-2.5 rounded-xl text-md transition-all
+    `flex items-center gap-3 px-4 py-2.5 rounded-xl text-lg transition-all
      ${
        isActive(path)
          ? "bg-[#E8F1FF] text-[#0A66FF] font-medium"
@@ -65,25 +61,6 @@ const Sidebar = () => {
             <FiKey size={18} /> Roles
           </Link>
 
-          <Link to="/master" className={menuItemStyle("/master")}>
-            <FiSettings size={18} /> Data Config
-          </Link>
-
-          <Link to="/system" className={menuItemStyle("/system")}>
-            <FiCpu size={18} /> System Config
-          </Link>
-
-          <Link to="/workflow" className={menuItemStyle("/workflow")}>
-            <FiGitBranch size={18} /> Workflow
-          </Link>
-
-          <Link to="/notifications" className={menuItemStyle("/notifications")}>
-            <FiBell size={18} /> Notifications
-          </Link>
-
-          <Link to="/integration" className={menuItemStyle("/integration")}>
-            <FiLayers size={18} /> Integration
-          </Link>
 
           <Link to="/reports" className={menuItemStyle("/reports")}>
             <FiBarChart2 size={18} /> Reports

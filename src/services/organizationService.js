@@ -35,7 +35,7 @@ export const organizationService = {
       
       return {
         totalOrganizations: kpis.totalTenants || 0,
-        totalBranches: 0, // Backend se agar branch count aaye
+        totalBranches: kpis.totalBranches || 0,
         activeUsers: kpis.activeUsers || 0,
         pendingRequests: 0,
       };

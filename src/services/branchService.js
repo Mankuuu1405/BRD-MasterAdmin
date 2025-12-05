@@ -26,17 +26,16 @@ export const branchService = {
   },
 
   // ADD NEW BRANCH
-  async addBranch(payload) {
-    try {
-      // Backend expects 'tenant' ID, mapping organizationId to tenant
-      const data = { ...payload, tenant: payload.organizationId };
-      const res = await api.post(BASE_URL, data);
-      return res.data;
-    } catch (error) {
-      console.error("Add Branch Error:", error);
-      throw error;
-    }
-  },
+ async addBranch(data) {
+  try {
+    const res = await api.post(BASE_URL, data);
+    return res.data;
+  } catch (err) {
+    console.error("Add Branch Error:", err.response?.data || err);
+    throw err;
+  }
+}
+,
 
   // UPDATE BRANCH
   async updateBranch(id, updatedValues) {

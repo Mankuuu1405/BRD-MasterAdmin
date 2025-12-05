@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://65.0.30.83:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const API_URL = `${API_BASE_URL}/api/token/`;
 const SIGNUP_URL = `${API_BASE_URL}/api/v1/users/signup/`;
 

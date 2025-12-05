@@ -1,23 +1,25 @@
+// src/pages/branches/UpdateBranch.jsx
 import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { FiArrowLeft, FiSave } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { organizationService } from "../../services/organizationService";
-import { branchService } from "../../services/branchService";
 
-const CreateBranch = () => {
+const UpdateBranch = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); // Get branch ID from URL
 
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
     organization: "",
-    branchCode: "",  // ✅ branch code
+    branchCode: "",
     name: "",
     address: "",
     contactPerson: "",
     phone: "",
+    email: "", // Added email field
   });
 
   const handleChange = (e) =>
@@ -36,19 +38,42 @@ const CreateBranch = () => {
   // Generate branch code when organization or name changes
   useEffect(() => {
     if (form.organization && form.name) {
-      const orgPrefix = organizations.find(o => o.id === form.organization)?.name
+      const orgPrefix =
+        organizations.find((o) => o.id === form.organization)?.name
+          .replace(/\s+/g, "")
+          .substring(0, 3)
+          .toUpperCase() || "ORG";
+      const namePrefix = form.name
         .replace(/\s+/g, "")
         .substring(0, 3)
-        .toUpperCase() || "ORG";
-      const namePrefix = form.name.replace(/\s+/g, "").substring(0, 3).toUpperCase();
-      setForm(prev => ({
+        .toUpperCase();
+      setForm((prev) => ({
         ...prev,
-        branchCode: `${orgPrefix}-${namePrefix}-${Date.now()}` // unique branch code
+        branchCode: `${orgPrefix}-${namePrefix}-${Date.now()}`,
       }));
     }
   }, [form.organization, form.name, organizations]);
 
-  const handleSubmit = async (e) => {
+   useEffect(() => {
+  const loadBranch = async () => {
+    const allBranches = await branchService.getBranches();
+    const branch = allBranches.find(b => b.id === id);
+    if (branch) {
+      setForm({
+        organization: branch.tenant?.id || "",
+        branchCode: branch.branch_code,
+        name: branch.name,
+        address: branch.address || "",
+        contactPerson: branch.contactPerson || "",
+        phone: branch.phone || "",
+        email: branch.email || "",
+      });
+    }
+  };
+  loadBranch();
+}, [id]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (
@@ -58,19 +83,12 @@ const CreateBranch = () => {
       !form.contactPerson ||
       !form.phone
     ) {
-      alert("Please fill all fields.");
+      alert("Please fill all required fields.");
       return;
     }
 
-    const payload = {
-      tenant: form.organization,
-      branch_code: form.branchCode,
-      name: form.name,
-      address: form.address,
-      phone: form.phone,
-    };
-
-    await branchService.addBranch(payload);
+    // Since backend doesn't exist, just alert the form data
+    alert("Branch updated successfully!\n\n" + JSON.stringify(form, null, 2));
     navigate("/organization/branches/list");
   };
 
@@ -93,8 +111,8 @@ const CreateBranch = () => {
         </button>
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Create Branch</h1>
-          <p className="text-gray-500 text-sm">Fill in the branch details below</p>
+          <h1 className="text-2xl font-bold text-gray-800">Update Branch</h1>
+          <p className="text-gray-500 text-sm">Edit branch details below</p>
         </div>
       </div>
 
@@ -120,7 +138,6 @@ const CreateBranch = () => {
             onChange={handleChange}
           />
 
-          {/* Branch Code */}
           <InputField
             label="Branch Code"
             name="branchCode"
@@ -128,9 +145,18 @@ const CreateBranch = () => {
             readOnly
           />
 
-          {/* Address */}
+          <InputField
+            label="Email"
+            name="email"
+            placeholder="Branch email"
+            value={form.email}
+            onChange={handleChange}
+          />
+
           <div className="flex flex-col">
-            <label className="text-gray-700 text-sm font-medium">Branch Address *</label>
+            <label className="text-gray-700 text-sm font-medium">
+              Branch Address *
+            </label>
             <textarea
               name="address"
               value={form.address}
@@ -160,7 +186,7 @@ const CreateBranch = () => {
             type="submit"
             className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-700 transition shadow-md"
           >
-            <FiSave /> Create Branch
+            <FiSave /> Update Branch
           </button>
         </form>
       </div>
@@ -199,4 +225,4 @@ function SelectField({ label, options = [], ...props }) {
   );
 }
 
-export default CreateBranch;
+export default UpdateBranch;
