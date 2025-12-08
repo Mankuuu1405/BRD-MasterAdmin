@@ -1,94 +1,40 @@
-// src/services/userService.js
-import { api } from "./api";
+import axiosInstance from "../utils/axiosInstance";
 
-const BASE_URL = "/api/v1/users/";
+// Keep BASE_URL as router path ending with a slash
+const BASE_URL = "/users/users/"; // ✅ trailing slash added
 
 export const userService = {
-
   // GET ALL USERS
   async getUsers() {
     try {
-      const res = await api.get(BASE_URL);
-      return res.data.map(user => ({
-        id: user.id, // Ensure ID matches backend
-        name: user.first_name ? `${user.first_name} ${user.last_name}` : user.email,
-        email: user.email,
-        role: user.role,
-        status: user.is_active ? "Active" : "Inactive",
-        lastLogin: user.last_login || "Never",
-        tenant: user.tenant
-      }));
+      const res = await axiosInstance.get(BASE_URL);
+      return res.data; 
     } catch (error) {
-      console.error("Fetch Users Error:", error);
+      console.error("Error fetching users:", error);
       return [];
     }
   },
 
-  // ADD NEW USER
-  async addUser(userPayload) {
-    try {
-      const res = await api.post(BASE_URL, {
-        email: userPayload.email,
-        password: userPayload.password, // Backend needs password
-        role: userPayload.role,
-        phone: userPayload.phone,
-        // Add other backend fields
-      });
-      return res.data;
-    } catch (error) {
-      console.error("Add User Error:", error);
-      throw error;
-    }
+  // GET SINGLE USER
+  async getUser(id) {
+    const res = await axiosInstance.get(`${BASE_URL}${id}/`); // ✅ id with trailing slash
+    return res.data;
+  },
+
+  // ADD USER
+  async addUser(data) {
+    const res = await axiosInstance.post(BASE_URL, data); // ✅ POST to URL with trailing slash
+    return res.data;
   },
 
   // UPDATE USER
-  async updateUser(id, payload) {
-    try {
-      const res = await api.patch(`${BASE_URL}${id}/`, payload);
-      return res.data;
-    } catch (error) {
-      console.error("Update User Error:", error);
-      throw error;
-    }
-  },
-
-  // TOGGLE STATUS (Active/Inactive)
-  async toggleUserStatus(id, currentStatus) {
-    const isActive = currentStatus === "Active";
-    try {
-      await api.patch(`${BASE_URL}${id}/`, { is_active: !isActive });
-      return true;
-    } catch (error) {
-      console.error("Toggle Status Error:", error);
-      return false;
-    }
+  async updateUser(id, data) {
+    const res = await axiosInstance.patch(`${BASE_URL}${id}/`, data); // ✅ trailing slash
+    return res.data;
   },
 
   // DELETE USER
   async deleteUser(id) {
-    try {
-      await api.delete(`${BASE_URL}${id}/`);
-      return true;
-    } catch (error) {
-      console.error("Delete User Error:", error);
-      return false;
-    }
-  },
-
-  // LOGIN ATTEMPTS (Requires Backend Implementation)
-  async getLoginAttempts() {
-    // If backend has /api/v1/audit-logs/
-    return [];
-  },
-
-  async recordLoginAttempt(log) {
-    // Optional: Send to backend analytics
-    return true;
-  },
-
-  // USER ACTIVITY
-  async getUserActivity() {
-    // If backend has audit logs
-    return [];
+    return axiosInstance.delete(`${BASE_URL}${id}/`); // ✅ trailing slash
   },
 };

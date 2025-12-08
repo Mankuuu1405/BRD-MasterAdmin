@@ -5,10 +5,14 @@ export const useUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  
+
+
   const loadUsers = useCallback(async () => {
     setLoading(true);
     const data = await userService.getUsers(); // ✔ Correct method
-    setUsers(data);
+    setUsers(Array.isArray(data) ? data : []);
+    // setUsers(data);
     setLoading(false);
   }, []);
 

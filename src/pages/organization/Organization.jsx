@@ -6,9 +6,7 @@ import useOrganizations from "../../hooks/useOrganization";
 import {
   FiPlusCircle,
   FiMapPin,
-  FiLayers,
-  FiUserCheck,
-  FiKey,
+  FiHome,
 } from "react-icons/fi";
 
 
@@ -51,29 +49,14 @@ const Organization = () => {
 
   const orgFeatures = [
     {
-      title: "Add New Organization",
-      icon: <FiPlusCircle className="text-indigo-600 text-xl" />,
-      onClick: () => navigate("/organization/add"),
+      title: "Organizations",
+      icon: <FiHome className="text-indigo-600 text-xl" />,
+      onClick: () => navigate("/organization/list"),
     },
     {
-      title: "Create Branches",
+      title: "Branches",
       icon: <FiMapPin className="text-green-600 text-xl" />,
-      onClick: () => navigate("/organization/branches/create"),
-    },
-    {
-      title: "Define Departments",
-      icon: <FiLayers className="text-yellow-600 text-xl" />,
-      onClick: () => navigate("/organization/departments"),
-    },
-    {
-      title: "Assign Staff to Departments",
-      icon: <FiUserCheck className="text-blue-600 text-xl" />,
-      onClick: () => navigate("/organization/staff-assign"),
-    },
-    {
-      title: "Assign Module Access to Branch",
-      icon: <FiKey className="text-red-600 text-xl" />,
-      onClick: () => navigate("/organization/module-access"),
+      onClick: () => navigate("/organization/branches/list"),
     },
   ];
 
@@ -100,9 +83,6 @@ const Organization = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         <StatCard title="Total Organizations" value={summary.totalOrganizations} />
         <StatCard title="Total Branches" value={summary.totalBranches} />
-        <StatCard title="Departments" value={summary.departments} />
-        <StatCard title="Staff Assigned" value={summary.staffAssigned} />
-        <StatCard title="Modules Assigned" value={summary.modulesAssigned} />
         <StatCard title="Pending Requests" value={summary.pendingRequests} />
       </div>
 

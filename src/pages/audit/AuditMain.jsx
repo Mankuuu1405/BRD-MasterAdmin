@@ -1,90 +1,110 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import { useNavigate } from "react-router-dom";
-
 import {
-  FiUserCheck,
-  FiEdit3,
-  FiClock,
-  FiGlobe,
+  FiArrowLeft,
+  FiSearch,
   FiDatabase,
+  FiRefreshCw
 } from "react-icons/fi";
+import { auditService } from "../../services/auditService"; // ✅ Service Import
 
-// ★ LOS-style Feature Card
-const FeatureCard = ({ icon, title, onClick }) => (
-  <div
-    onClick={onClick}
-    className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition"
-  >
-    <div className="w-14 h-14 bg-gray-100 border border-gray-300 rounded-xl flex items-center justify-center">
-      {React.cloneElement(icon, {
-        className: "text-gray-700 text-[22px]",
-        strokeWidth: 1.5,
-      })}
+const BranchDataCard = ({ item }) => (
+  <div className="bg-white p-5 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition">
+    <div className="flex justify-between items-start">
+      <div>
+        {/* Mapping User Email as Branch Name for now since logs are generic */}
+        <p className="font-semibold text-gray-900">{item.user_email || "System/Branch"}</p>
+        <p className="text-gray-500 text-sm mb-2">{item.description}</p>
+
+        {/* Status Badge */}
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold 
+          ${item.action_type === 'CREATE' ? "bg-green-100 text-green-700" : 
+            item.action_type === 'UPDATE' ? "bg-blue-100 text-blue-700" : 
+            "bg-gray-100 text-gray-700"}`}>
+          {item.action_type}
+        </span>
+
+        {/* Timestamp */}
+        <p className="text-gray-500 text-xs mt-3">
+          <b>Sync Time:</b> {new Date(item.timestamp).toLocaleString()}
+        </p>
+
+        <p className="text-gray-400 text-xs mt-1">IP: {item.ip_address}</p>
+      </div>
     </div>
-
-    <h3 className="text-[15px] font-medium text-gray-800">{title}</h3>
   </div>
 );
 
-const auditItems = [
-  {
-    title: "View User Actions",
-    icon: <FiUserCheck />,
-    link: "/audit/user-actions",
-  },
-  {
-    title: "Track Edits & Deletes",
-    icon: <FiEdit3 />,
-    link: "/audit/edits-deletes",
-  },
-  {
-    title: "View Timestamps / Activity Timeline",
-    icon: <FiClock />,
-    link: "/audit/timestamps",
-  },
-  {
-    title: "Track IP Addresses",
-    icon: <FiGlobe />,
-    link: "/audit/ip-logs",
-  },
-  {
-    title: "Monitor Branch Data Generation",
-    icon: <FiDatabase />,
-    link: "/audit/branch-data",
-  },
-];
+const BranchDataMonitor = () => {
+  const [logs, setLogs] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
-const AuditMain = () => {
-  const navigate = useNavigate();
+  useEffect(() => {
+    loadData();
+  }, [search]);
+
+  const loadData = async () => {
+    setLoading(true);
+    // Ideally, filter by module="Branch" if backend supports it
+    // const params = { search, module: 'Branch' }; 
+    const params = { search }; 
+    try {
+      const data = await auditService.getLogs(params);
+      setLogs(data || []);
+    } catch (error) {
+      console.error("Error loading branch logs");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <MainLayout>
-      {/* HEADER */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Audit & Compliance System
-        </h1>
-        <p className="text-gray-500 text-sm">
-          View user actions, timestamps, IP logs and audit trails.
-        </p>
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={() => window.history.back()} className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200">
+          <FiArrowLeft className="text-gray-700 text-xl" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+            <FiDatabase /> Branch Data Monitor
+          </h1>
+          <p className="text-gray-500 text-sm">Monitor data sync activities.</p>
+        </div>
       </div>
 
-      {/* GRID */}
-      <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {auditItems.map((item, index) => (
-            <FeatureCard
-              key={index}
-              icon={item.icon}
-              title={item.title}
-              onClick={() => navigate(item.link)}
-            />
-          ))}
+      {/* TOOLBAR */}
+      <div className="flex justify-between mb-4">
+        <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-3 flex items-center gap-3 w-full max-w-md">
+          <FiSearch className="text-gray-500" />
+          <input
+            type="text"
+            placeholder="Search logs..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full outline-none text-sm"
+          />
         </div>
+        
+        <button onClick={loadData} className="p-3 bg-white border rounded-xl hover:bg-gray-50 text-gray-600">
+            <FiRefreshCw />
+        </button>
+      </div>
+
+      {/* LIST */}
+      <div className="space-y-4">
+        {loading ? (
+          <p className="text-center text-gray-500 py-10">Loading logs...</p>
+        ) : logs.length === 0 ? (
+          <p className="text-center text-gray-500 py-10">No branch data logs found.</p>
+        ) : (
+          logs.map((item) => (
+            <BranchDataCard key={item.id} item={item} />
+          ))
+        )}
       </div>
     </MainLayout>
   );
 };
 
-export default AuditMain;
+export default BranchDataMonitor;

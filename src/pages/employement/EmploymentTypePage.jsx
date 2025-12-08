@@ -1,79 +1,66 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
+import employmentTypeService from "../../services/employementTypeService";
 
 import {
   FiArrowLeft,
   FiSearch,
-  FiPlus,
   FiEdit2,
-  FiTrash2
+  FiTrash2,
+  FiEye
 } from "react-icons/fi";
 
 import { useNavigate } from "react-router-dom";
-import couponService from "../../services/couponService";
 
-export default function CouponPage() {
+export default function EmploymentTypePage() {
   const [list, setList] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
 
-  // Load coupons from backend
-  const loadCoupons = async () => {
-    try {
-      const data = await couponService.getAll(); // FIXED
-      setList(data);
-      setFiltered(data);
-    } catch (err) {
-      console.error("Failed to load coupons:", err);
-    }
+  const loadTypes = async () => {
+    const res = await employmentTypeService.getAll();
+    setList(res);
+    setFiltered(res);
   };
 
   useEffect(() => {
-    loadCoupons();
+    loadTypes();
   }, []);
 
-  // Search filter
   const handleSearch = (e) => {
     const keyword = e.target.value.toLowerCase();
     setSearch(keyword);
 
     setFiltered(
       list.filter((item) =>
-        item.coupon_code.toLowerCase().includes(keyword)
+        item.emp_name.toLowerCase().includes(keyword)
       )
     );
   };
 
-  // Delete coupon
   const handleDelete = async (uuid) => {
-    if (!window.confirm("Delete this coupon?")) return;
-
-    await couponService.delete(uuid);
-    loadCoupons();
+    if (!window.confirm("Are you sure you want to delete this employment type?")) return;
+    await employmentTypeService.delete(uuid);
+    loadTypes();
   };
 
   return (
     <MainLayout>
-      {/* HEADER */}
       <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 rounded-xl bg-white border hover:bg-gray-100"
-        >
+        <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-white border hover:bg-gray-100">
           <FiArrowLeft />
         </button>
-        <h1 className="text-xl font-semibold">Coupons</h1>
+        <h1 className="text-xl font-semibold">Employment Types</h1>
       </div>
 
-      {/* SEARCH + ADD */}
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center bg-white p-3 rounded-xl w-[85%] shadow-sm border">
+        <div className="flex items-center bg-white p-3 rounded-xl w-full shadow-sm border">
           <FiSearch className="text-gray-400 mr-2" />
           <input
             type="text"
-            placeholder="Search coupon..."
+            placeholder="Search Employment Type..."
             className="outline-none w-full"
             value={search}
             onChange={handleSearch}
@@ -81,35 +68,31 @@ export default function CouponPage() {
         </div>
 
         <button
-          onClick={() => navigate("/coupons/add")}
-          className="px-4 py-3 bg-blue-600 text-white rounded-xl flex items-center gap-2 hover:bg-blue-700 shadow"
+          onClick={() => navigate("/employment-types/add")}
+          className="ml-4 px-10 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
         >
-          <FiPlus /> Add Coupon
+          Add
         </button>
       </div>
 
-      {/* COUPON LIST */}
       <div className="bg-white rounded-xl shadow-sm border p-6 mb-10">
         {filtered.length === 0 ? (
-          <p className="text-gray-500 text-sm">No coupons found.</p>
+          <p className="text-gray-500">No employment types found.</p>
         ) : (
           filtered.map((item) => (
-            <div
-              key={item.uuid}
-              className="flex justify-between items-center py-4 border-b last:border-none"
-            >
-              {/* Coupon Info */}
-              <div>
-                <p className="text-lg font-medium">{item.coupon_code}</p>
-                <p className="text-sm text-gray-500">
-                  Value: ₹{item.coupon_value} | Valid: {item.date_from} → {item.date_to}
-                </p>
-              </div>
+            <div key={item.uuid} className="flex justify-between items-center py-4 border-b last:border-none">
+              <p className="text-lg font-medium">{item.emp_name}</p>
 
-              {/* Edit & Delete Buttons */}
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => navigate(`/coupons/edit/${item.uuid}`)}
+                  onClick={() => navigate(`/employment-types/view/${item.uuid}`)}
+                  className="p-2 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700"
+                >
+                  <FiEye size={18} />
+                </button>
+
+                <button
+                  onClick={() => navigate(`/employment-types/edit/${item.uuid}`)}
                   className="p-2 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
                 >
                   <FiEdit2 size={18} />

@@ -1,6 +1,7 @@
 import { api } from "./api";
 
-const BASE_URL = "/api/v1/tenants/branches/";
+// ✅ Fix: '/api/v1' हटा दिया गया है
+const BASE_URL = "/tenants/branches/";
 
 export const branchService = {
 
@@ -15,10 +16,21 @@ export const branchService = {
     }
   },
 
+  // GET SINGLE BRANCH
+  async getBranch(id) {
+    try {
+      const res = await api.get(`${BASE_URL}${id}`);
+      return res.data;
+    } catch (error) {
+      console.error("Fetch Single Branch Error:", error);
+      throw error;
+    }
+  },
+
   // GET BRANCHES BY ORGANIZATION
   async getBranchesByOrg(orgId) {
     try {
-      const res = await api.get(BASE_URL, { tenant: orgId });
+      const res = await api.get(BASE_URL, { params: { tenant: orgId } });
       return res.data;
     } catch (error) {
       return [];
@@ -26,15 +38,13 @@ export const branchService = {
   },
 
   // ADD NEW BRANCH
-  async addBranch(payload) {
+  async addBranch(data) {
     try {
-      // Backend expects 'tenant' ID, mapping organizationId to tenant
-      const data = { ...payload, tenant: payload.organizationId };
       const res = await api.post(BASE_URL, data);
       return res.data;
-    } catch (error) {
-      console.error("Add Branch Error:", error);
-      throw error;
+    } catch (err) {
+      console.error("Add Branch Error:", err.response?.data || err);
+      throw err;
     }
   },
 
@@ -44,6 +54,7 @@ export const branchService = {
       const res = await api.patch(`${BASE_URL}${id}/`, updatedValues);
       return res.data;
     } catch (error) {
+      console.error("Update Branch Error:", error);
       throw error;
     }
   },

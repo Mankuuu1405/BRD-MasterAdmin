@@ -46,13 +46,20 @@ export default function AddOrganization() {
 
     try {
       const payload = {
-        ...form,
-        loan_product: form.loan_product || [],
-      };
+      name: form.business_name,
+      tenant_type: "NBFC", // or hardcode a default or map from frontend
+      email: form.email,
+      phone: form.mobile_no,
+      address: form.address,
+      city: "",     // leave blank or add extra field if you want
+      state: "",    // leave blank
+      pincode: "",  // leave blank
+      is_active: true,
+    };
 
       await organizationService.addOrganization(payload);
 
-      navigate("/organization");
+      navigate("/organizations");
     } catch (err) {
       setErrors("Something went wrong while saving organization.");
     } finally {

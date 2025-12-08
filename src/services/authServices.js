@@ -1,17 +1,16 @@
 import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://65.0.30.83:8000";
-const API_URL = `${API_BASE_URL}/api/token/`;
-const SIGNUP_URL = `${API_BASE_URL}/api/v1/users/signup/`;
+// Login URL root par hai (/api/token/), isliye hum ROOT URL define karte hain
+const ROOT_URL = "http://127.0.0.1:8000"; 
 
 export const authService = {
+  // LOGIN
   login: async (email, password) => {
     try {
-      // Normalize email to lowercase for case-insensitive login
-      const normalizedEmail = email.toLowerCase().trim();
-      
-      const response = await axios.post(API_URL, {
-        email: normalizedEmail,
+      // Note: Login /api/v1 ke bahar hai, isliye direct axios use kar rahe hain
+      const response = await axios.post(`${ROOT_URL}/api/token/`, {
+        email: email.toLowerCase().trim(),
         password: password,
       });
 
@@ -19,49 +18,35 @@ export const authService = {
         localStorage.setItem("access_token", response.data.access);
         localStorage.setItem("refresh_token", response.data.refresh);
         localStorage.setItem("user_email", email);
-
-        return { email, access_token: response.data.access };
+        return response.data;
       }
-
       return null;
     } catch (error) {
       console.error("Login Error:", error.response?.data || error.message);
-      // Return error details for better error handling
-      throw {
-        message: error.response?.data?.detail || 
-                 error.response?.data?.non_field_errors?.[0] ||
-                 "Invalid email or password",
-        status: error.response?.status,
-        data: error.response?.data
-      };
-    }
-  },
-
-  signup: async (userData) => {
-    try {
-      const response = await axios.post(SIGNUP_URL, {
-        email: userData.email,
-        password: userData.password,
-        role: userData.role || "MASTER_ADMIN",
-        is_active: true,
-      });
-
-      // Store user data locally as fallback
-      const storedUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
-      storedUsers.push({
-        ...userData,
-        id: response.data?.id || userData.id,
-      });
-      localStorage.setItem("registeredUsers", JSON.stringify(storedUsers));
-
-      return response.data;
-    } catch (error) {
-      console.error("Signup Error:", error.response?.data || error.message);
-      // Throw error to be handled by the component
       throw error;
     }
   },
 
+  // SIGNUP
+  signup: async (userData) => {
+    try {
+      // ✅ Fix: axiosInstance use karenge jo already '/api/v1' par set hai.
+      // Isliye yahan sirf '/users/signup/' likhna hai.
+      const response = await axiosInstance.post("/users/signup/", {
+        email: userData.email,
+        password: userData.password,
+        role: "MASTER_ADMIN", // Default role
+        first_name: userData.firstName,
+        last_name: userData.lastName
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Signup Error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  // Helpers
   recordLoginAttempt: async () => {},
   recordActivity: async () => {},
 };

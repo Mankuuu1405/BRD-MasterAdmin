@@ -4,11 +4,7 @@ import React from "react";
 import MainLayout from "../../layout/MainLayout";
 import {
   FiUserPlus,
-  FiKey,
-  FiUserCheck,
-  FiUsers,
-  FiActivity,
-  FiLogIn,
+ 
   FiList,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
@@ -35,11 +31,7 @@ const FeatureCard = ({ title, icon, onClick }) => (
 const userFeatures = [
   { title: "User List", icon: <FiList />, link: "/users/list" },
   { title: "Add New User", icon: <FiUserPlus />, link: "/users/add" },
-  { title: "Reset User Password", icon: <FiKey />, link: "/users/reset-password" },
-  { title: "Activate / Deactivate User", icon: <FiUserCheck />, link: "/users/toggle-status" },
-  { title: "Assign User to Branch / Department", icon: <FiUsers />, link: "/users/assign" },
-  { title: "View Login Attempts", icon: <FiLogIn />, link: "/users/login-attempts" },
-  { title: "Track User Activity", icon: <FiActivity />, link: "/users/activity" },
+,
 ];
 
 const Users = () => {
