@@ -1,8 +1,8 @@
 import axiosInstance from "../utils/axiosInstance";
 
-const BASE_URL = "adminpanel/occupation-types/";
+const BASE_URL = "adminpanel/employment-types/";
 
-const occupationTypeService = {
+const employmentTypeService = {
   async getAll() {
     const res = await axiosInstance.get(BASE_URL);
     return res.data;
@@ -29,4 +29,4 @@ const occupationTypeService = {
   }
 };
 
-export default occupationTypeService;
+export default employmentTypeService;

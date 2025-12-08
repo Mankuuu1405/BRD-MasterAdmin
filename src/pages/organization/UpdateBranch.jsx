@@ -1,13 +1,13 @@
-// src/pages/branches/UpdateBranch.jsx
 import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { FiArrowLeft, FiSave } from "react-icons/fi";
 import { useNavigate, useParams } from "react-router-dom";
 import { organizationService } from "../../services/organizationService";
+import { branchService } from "../../services/branchService"; // ✅ Import BranchService
 
 const UpdateBranch = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get branch ID from URL
+  const { id } = useParams(); // URL se Branch ID milega
 
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,85 +17,81 @@ const UpdateBranch = () => {
     branchCode: "",
     name: "",
     address: "",
-    contactPerson: "",
+    contactPerson: "", // Backend mein shayad ye field alag naam se ho, check kar lena
     phone: "",
-    email: "", // Added email field
+    email: "",
   });
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Load organizations
+  // ✅ Load Data (Organizations + Current Branch Info)
   useEffect(() => {
-    const load = async () => {
-      const orgs = await organizationService.getOrganizations();
-      setOrganizations(orgs);
-      setLoading(false);
+    const loadData = async () => {
+      try {
+        // 1. Load Orgs for Dropdown
+        const orgs = await organizationService.getOrganizations();
+        setOrganizations(orgs);
+
+        // 2. Load Current Branch Data from Backend
+        const branchData = await branchService.getBranch(id);
+        
+        // Form ko fill karein
+        setForm({
+          organization: branchData.tenant || "", // Backend 'tenant' ID bhejta hai
+          branchCode: branchData.branch_code,
+          name: branchData.name,
+          address: branchData.address || "",
+          phone: branchData.phone || "",
+          email: branchData.email || "",
+          contactPerson: branchData.contact_person || "", // Check backend field name
+        });
+
+      } catch (error) {
+        console.error("Error loading branch data:", error);
+        alert("Failed to load branch details.");
+        navigate("/organization/branches/list");
+      } finally {
+        setLoading(false);
+      }
     };
-    load();
-  }, []);
+    loadData();
+  }, [id, navigate]);
 
-  // Generate branch code when organization or name changes
-  useEffect(() => {
-    if (form.organization && form.name) {
-      const orgPrefix =
-        organizations.find((o) => o.id === form.organization)?.name
-          .replace(/\s+/g, "")
-          .substring(0, 3)
-          .toUpperCase() || "ORG";
-      const namePrefix = form.name
-        .replace(/\s+/g, "")
-        .substring(0, 3)
-        .toUpperCase();
-      setForm((prev) => ({
-        ...prev,
-        branchCode: `${orgPrefix}-${namePrefix}-${Date.now()}`,
-      }));
-    }
-  }, [form.organization, form.name, organizations]);
-
-   useEffect(() => {
-  const loadBranch = async () => {
-    const allBranches = await branchService.getBranches();
-    const branch = allBranches.find(b => b.id === id);
-    if (branch) {
-      setForm({
-        organization: branch.tenant?.id || "",
-        branchCode: branch.branch_code,
-        name: branch.name,
-        address: branch.address || "",
-        contactPerson: branch.contactPerson || "",
-        phone: branch.phone || "",
-        email: branch.email || "",
-      });
-    }
-  };
-  loadBranch();
-}, [id]);
-
-  const handleSubmit = (e) => {
+  // ✅ Real Submit Handler
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !form.organization ||
-      !form.name ||
-      !form.address ||
-      !form.contactPerson ||
-      !form.phone
-    ) {
+    if (!form.organization || !form.name) {
       alert("Please fill all required fields.");
       return;
     }
 
-    // Since backend doesn't exist, just alert the form data
-    alert("Branch updated successfully!\n\n" + JSON.stringify(form, null, 2));
-    navigate("/organization/branches/list");
+    // Payload taiyar karein
+    const payload = {
+      tenant: form.organization, // Backend expects 'tenant'
+      name: form.name,
+      branch_code: form.branchCode,
+      address: form.address,
+      phone: form.phone,
+      email: form.email,
+      // Add other fields if backend supports them
+    };
+
+    try {
+      await branchService.updateBranch(id, payload);
+      alert("Branch updated successfully!");
+      navigate("/organization/branches/list");
+    } catch (error) {
+      console.error("Update failed:", error);
+      alert("Failed to update branch. Please try again.");
+    }
   };
 
   if (loading)
     return (
       <MainLayout>
-        <p className="text-gray-600 text-sm">Loading organizations...</p>
+        <div className="p-10 text-center text-gray-500">Loading branch details...</div>
       </MainLayout>
     );
 
@@ -126,7 +122,7 @@ const UpdateBranch = () => {
             onChange={handleChange}
             options={organizations.map((o) => ({
               label: o.name,
-              value: o.id,
+              value: o.tenant_id || o.id, // Ensure correct ID usage
             }))}
           />
 
@@ -142,7 +138,8 @@ const UpdateBranch = () => {
             label="Branch Code"
             name="branchCode"
             value={form.branchCode}
-            readOnly
+            readOnly // Code usually change nahi hona chahiye
+            className="bg-gray-100 cursor-not-allowed"
           />
 
           <InputField
@@ -167,7 +164,7 @@ const UpdateBranch = () => {
           </div>
 
           <InputField
-            label="Contact Person *"
+            label="Contact Person"
             name="contactPerson"
             value={form.contactPerson}
             onChange={handleChange}
@@ -184,9 +181,9 @@ const UpdateBranch = () => {
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-700 transition shadow-md"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-md"
           >
-            <FiSave /> Update Branch
+            <FiSave /> Update Changes
           </button>
         </form>
       </div>
@@ -194,13 +191,14 @@ const UpdateBranch = () => {
   );
 };
 
+// Helper Components (Same as before)
 function InputField({ label, ...props }) {
   return (
     <div className="flex flex-col">
       <label className="text-gray-700 text-sm font-medium">{label}</label>
       <input
         {...props}
-        className="mt-2 p-3 rounded-xl bg-gray-50 shadow-sm focus:bg-white outline-none"
+        className={`mt-2 p-3 rounded-xl bg-gray-50 shadow-sm focus:bg-white outline-none ${props.className || ''}`}
       />
     </div>
   );

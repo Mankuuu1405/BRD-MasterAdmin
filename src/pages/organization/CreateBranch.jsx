@@ -13,7 +13,7 @@ const CreateBranch = () => {
 
   const [form, setForm] = useState({
     organization: "",
-    branchCode: "",  // ✅ branch code
+    branchCode: "", // ✅ branch code
     name: "",
     address: "",
     contactPerson: "",
@@ -36,14 +36,19 @@ const CreateBranch = () => {
   // Generate branch code when organization or name changes
   useEffect(() => {
     if (form.organization && form.name) {
-      const orgPrefix = organizations.find(o => o.id === form.organization)?.name
+      const orgPrefix =
+        organizations
+          .find((o) => o.tenant_id === form.organization)
+          ?.name.replace(/\s+/g, "")
+          .substring(0, 3)
+          .toUpperCase() || "ORG";
+      const namePrefix = form.name
         .replace(/\s+/g, "")
         .substring(0, 3)
-        .toUpperCase() || "ORG";
-      const namePrefix = form.name.replace(/\s+/g, "").substring(0, 3).toUpperCase();
-      setForm(prev => ({
+        .toUpperCase();
+      setForm((prev) => ({
         ...prev,
-        branchCode: `${orgPrefix}-${namePrefix}-${Date.now()}` // unique branch code
+        branchCode: `${orgPrefix}-${namePrefix}-${Date.now()}`, // unique branch code
       }));
     }
   }, [form.organization, form.name, organizations]);
@@ -63,13 +68,14 @@ const CreateBranch = () => {
     }
 
     const payload = {
-      tenant: form.organization,
+      tenant: form.organization, 
       branch_code: form.branchCode,
       name: form.name,
       address: form.address,
       phone: form.phone,
     };
 
+    console.log("Branch Payload:", payload);
     await branchService.addBranch(payload);
     navigate("/organization/branches/list");
   };
@@ -108,7 +114,7 @@ const CreateBranch = () => {
             onChange={handleChange}
             options={organizations.map((o) => ({
               label: o.name,
-              value: o.id,
+              value: o.tenant_id, // ✅ CORRECT
             }))}
           />
 
@@ -130,7 +136,9 @@ const CreateBranch = () => {
 
           {/* Address */}
           <div className="flex flex-col">
-            <label className="text-gray-700 text-sm font-medium">Branch Address *</label>
+            <label className="text-gray-700 text-sm font-medium">
+              Branch Address *
+            </label>
             <textarea
               name="address"
               value={form.address}

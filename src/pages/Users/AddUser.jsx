@@ -98,8 +98,8 @@ const AddUser = () => {
       password: form.password,
       role: ROLE_MAP[form.role],          // map to backend enum
 
-      // ❗ Tenant mat bhejo → backend khud assign karega (perform_create)
-      // tenant: not sent
+      // ✅ FIX: Tenant (Organization) bhejna zaroori hai
+      tenant: form.organization ? Number(form.organization) : null,
 
       branch: form.branch ? Number(form.branch) : null,
 

@@ -1,40 +1,40 @@
-import { api } from "./api";
+import axiosInstance from "../utils/axiosInstance";
 
-const BASE_URL = "/api/v1/users/";
+// Keep BASE_URL as router path ending with a slash
+const BASE_URL = "/users/users/"; // ✅ trailing slash added
 
 export const userService = {
-  
+  // GET ALL USERS
   async getUsers() {
-    const res = await api.get(BASE_URL);
-    return res.data;
+    try {
+      const res = await axiosInstance.get(BASE_URL);
+      return res.data; 
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return [];
+    }
   },
 
+  // GET SINGLE USER
   async getUser(id) {
-    const res = await api.get(`${BASE_URL}${id}/`);
+    const res = await axiosInstance.get(`${BASE_URL}${id}/`); // ✅ id with trailing slash
     return res.data;
   },
 
-  // ✅ ADD NEW USER (FIX)
- async addUser(data) {
-  const res = await api.post("/api/v1/users/", data);
-  return res.data;
-}
-,
-
-
-  async toggleUserStatus(id) {
-    return api.patch(`${BASE_URL}${id}/`, {
-      isDeleted: false,
-      statusToggle: true
-    });
+  // ADD USER
+  async addUser(data) {
+    const res = await axiosInstance.post(BASE_URL, data); // ✅ POST to URL with trailing slash
+    return res.data;
   },
- async deleteUser(id) {
-    // ✅ REAL DELETE (ModelViewSet destroy)
-    return api.delete(`${BASE_URL}${id}/`);
-  },
+
+  // UPDATE USER
   async updateUser(id, data) {
-  const res = await api.patch(`/api/v1/users/${id}/`, data);
-  return res.data;
-}
+    const res = await axiosInstance.patch(`${BASE_URL}${id}/`, data); // ✅ trailing slash
+    return res.data;
+  },
 
+  // DELETE USER
+  async deleteUser(id) {
+    return axiosInstance.delete(`${BASE_URL}${id}/`); // ✅ trailing slash
+  },
 };

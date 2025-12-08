@@ -31,17 +31,17 @@ const subscriptionFeatures = [
   {
     title: "Subscription List",
     icon: <FiList />,
-    link: "/subscription/list",
+    link: "/subscriptions/list",
   },
   {
     title: "Add New Subscription",
     icon: <FiPlus />,
-    link: "/subscription/add",
+    link: "/subscriptions/add",
   },
   {
     title: "Coupons",
     icon: <FiTag />,
-    link: "/coupon",
+    link: "/coupons",
   },
   {
     title: "Subscribers",

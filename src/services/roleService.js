@@ -1,10 +1,11 @@
 import { api } from "./api";
 
-const BASE_URL = "/api/v1/adminpanel/role-masters/";
+// ✅ Fix: '/api/v1' हटा दिया गया है
+const BASE_URL = "/adminpanel/role-masters/";
 
 export const roleService = {
 
-  // GET ALL ROLES
+  // 1. GET ALL ROLES
   async getRoles() {
     try {
       const res = await api.get(BASE_URL);
@@ -20,44 +21,17 @@ export const roleService = {
     }
   },
 
-  // ADD ROLE
+  // 2. ADD ROLE
   async addRole(roleName) {
     try {
       const res = await api.post(BASE_URL, { name: roleName });
-      return {
-        id: res.data.id,
-        roleName: res.data.name,
-        createdAt: res.data.created_at
-      };
+      return res.data;
     } catch (error) {
       throw error;
     }
   },
 
-  // SAVE PERMISSIONS
-  async savePermissions(roleId, permissions) {
-    // Backend endpoint needed for permissions. 
-    // Assuming a custom action or separate endpoint.
-    try {
-      await api.post(`${BASE_URL}${roleId}/permissions/`, { permissions });
-      return true;
-    } catch (error) {
-      console.warn("Permission save API not implemented on backend yet");
-      return false;
-    }
-  },
-
-  // GET PERMISSIONS
-  async getPermissions(roleId) {
-    try {
-      const res = await api.get(`${BASE_URL}${roleId}/permissions/`);
-      return res.data;
-    } catch (error) {
-      return {};
-    }
-  },
-
-  // DELETE ROLE
+  // 3. DELETE ROLE
   async deleteRole(roleId) {
     try {
       await api.delete(`${BASE_URL}${roleId}/`);
@@ -65,5 +39,27 @@ export const roleService = {
     } catch (error) {
       return false;
     }
-  }
+  },
+
+  // 4. GET PERMISSIONS
+  async getPermissions(roleId) {
+    try {
+      const res = await api.get(`${BASE_URL}${roleId}/permissions/`);
+      return res.data; 
+    } catch (error) {
+      console.error("Fetch Permissions Error:", error);
+      return {};
+    }
+  },
+
+  // 5. SAVE PERMISSIONS
+  async savePermissions(roleId, permissions) {
+    try {
+      await api.post(`${BASE_URL}${roleId}/permissions/`, { permissions });
+      return true;
+    } catch (error) {
+      console.error("Save Permissions Error:", error);
+      throw error;
+    }
+  },
 };
