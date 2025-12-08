@@ -3,7 +3,6 @@ import MainLayout from "../../layout/MainLayout";
 import { FiArrowLeft, FiSearch, FiTrash2, FiEdit3 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useUsers } from "../../hooks/useUsers";
-import { userService } from "../../services/userService";
 
 const UserList = () => {
   const navigate = useNavigate();

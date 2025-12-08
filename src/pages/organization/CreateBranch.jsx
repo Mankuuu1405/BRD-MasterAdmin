@@ -100,9 +100,7 @@ const CreateBranch = () => {
 
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Create Branch</h1>
-          <p className="text-gray-500 text-sm">
-            Fill in the branch details below
-          </p>
+          <p className="text-gray-500 text-sm">Fill in the branch details below</p>
         </div>
       </div>
 
