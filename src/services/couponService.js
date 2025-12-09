@@ -1,7 +1,7 @@
 import axiosInstance from "../utils/axiosInstance";
 
 // Correct Django API URL
-const BASE_URL = "adminpanel/coupons/";
+const BASE_URL = "/adminpanel/coupons/";
 
 const couponService = {
   
@@ -9,7 +9,7 @@ const couponService = {
   async getAll() {
     try {
       const res = await axiosInstance.get(BASE_URL);
-      return res.data;   // returns array of coupons
+      return res.data;
     } catch (error) {
       console.error("❌ Error fetching coupons:", error);
       return [];
@@ -20,7 +20,7 @@ const couponService = {
   async getOne(uuid) {
     try {
       const res = await axiosInstance.get(`${BASE_URL}${uuid}/`);
-      return res.data;   // returns coupon object
+      return res.data;
     } catch (error) {
       console.error("❌ Error fetching coupon:", error);
       throw error;
@@ -31,7 +31,7 @@ const couponService = {
   async create(data) {
     try {
       const res = await axiosInstance.post(BASE_URL, data);
-      return res.data;   // returns created coupon
+      return res.data;
     } catch (error) {
       console.error("❌ Error creating coupon:", error);
       throw error;

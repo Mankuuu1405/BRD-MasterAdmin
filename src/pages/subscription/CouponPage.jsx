@@ -110,7 +110,7 @@ export default function CouponPage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate(`/coupons/edit/${item.uuid}`)}
-                  className="p-2 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
+                  className="p-2 rounded-lg bg-ble-100 hover:bg-blue-200 text-blue-700"
                 >
                   <FiEdit2 size={18} />
                 </button>

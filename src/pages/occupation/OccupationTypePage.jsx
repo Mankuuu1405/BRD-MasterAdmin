@@ -109,7 +109,7 @@ export default function OccupationTypePage() {
                 {/* EDIT */}
                 <button
                   onClick={() => navigate(`/occupation-types/edit/${item.uuid}`)}
-                  className="p-2 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
+                  className="p-2 rounded-lg  hover:bg-blue-200 text-blue-700"
                 >
                   <FiEdit2 size={18} />
                 </button>

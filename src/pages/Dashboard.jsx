@@ -5,9 +5,19 @@ import ActiveUserChart from "../components/ActiveUserChart";
 import LoanTrendChart from "../components/LoanTrendChart";
 import ReactiveActivity from "../components/RecentActivity";
 import AlertsPage from "../components/AlertsPage";
-
 import useDashboard from "../hooks/useDashboard";
 import { dashboardService } from "../services/dashboardService";
+import {
+  FiUsers,
+  FiHome,
+  FiGitBranch,
+  FiActivity,
+  FiTrendingUp,
+  FiDatabase,
+  FiAlertTriangle,
+  FiClipboard
+} from "react-icons/fi";
+
 
 const Dashboard = () => {
   const { data: cards, loading: loadingCards } = useDashboard(
@@ -44,18 +54,21 @@ const Dashboard = () => {
     <MainLayout>
 
       {/* TOP CARDS — SCREENSHOT STYLE */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
-        <Card title="Total Organizations" value={cards.totalOrganizations} />
-        <Card title="Total Branches" value={cards.totalBranches} />
-        <Card title="Active Users" value={cards.activeUsers} />
-        <Card title="Active & Pending Loans" value={cards.activeLoans} />
-        <Card title="Daily Disbursement" value={cards.dailyDisbursement} />
-        <Card title="API Status" value={cards.apiStatus} />
-        <Card title="Recent Activities" value="View Logs →" />
-        <Card title="Alerts" value={`${cards.alerts} Critical`} />
+  <Card icon={<FiHome />} title="Total Organizations" value={cards.totalOrganizations} />
+  <Card icon={<FiGitBranch />} title="Total Branches" value={cards.totalBranches} />
+  <Card icon={<FiUsers />} title="Active Users" value={cards.activeUsers} />
+  <Card icon={<FiActivity />} title="Active & Pending Loans" value={cards.activeLoans} />
 
-      </div>
+  <Card icon={<FiTrendingUp />} title="Daily Disbursement" value={cards.dailyDisbursement} />
+  <Card icon={<FiDatabase />} title="API Status" value={cards.apiStatus} />
+
+  <Card icon={<FiClipboard />} title="Recent Activities" value="View Logs →" />
+  <Card icon={<FiAlertTriangle />} title="Alerts" value={`${cards.alerts} Critical`} />
+
+</div>
+
 
       {/* CHARTS */}
       <div className="flex flex-col gap-8 mb-10">
@@ -78,18 +91,29 @@ const Dashboard = () => {
 // -----------------------
 //   CARD COMPONENT
 // -----------------------
-const Card = ({ title, value }) => (
-  <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
+const Card = ({ title, value, icon }) => (
+  <div className="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
 
-    <div className="flex flex-col">
-      <h3 className="text-gray-600 text-sm font-medium">{title}</h3>
+    <div className="flex items-center gap-4">
 
-      <p className="text-3xl font-semibold text-gray-900 mt-3">
-        {value}
-      </p>
+      {/* Icon Circle */}
+      <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 text-2xl shadow-sm">
+        {icon}
+      </div>
+
+      {/* Text */}
+      <div className="flex flex-col">
+        <h3 className="text-gray-600 text-sm font-medium">{title}</h3>
+
+        <p className="text-2xl font-semibold text-gray-900 mt-1">
+          {value}
+        </p>
+      </div>
+
     </div>
 
   </div>
 );
+
 
 export default Dashboard;

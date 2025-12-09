@@ -29,8 +29,8 @@ export default function AddCoupon() {
   // Load all subscription plans
   const loadSubscriptions = async () => {
     try {
-      const data = await subscriptionService.getAll(); // FIXED
-      setSubscriptions(data);
+      const data = await subscriptionService.getAll();
+      setSubscriptions(data);  // NOW subscription_name available
     } catch (err) {
       console.error("Failed to load subscriptions", err);
     }
@@ -46,15 +46,15 @@ export default function AddCoupon() {
   };
 
   // toggle subscription checkbox
-  const toggleSubscription = (uuid) => {
+  const toggleSubscription = (id) => {
     setForm((prev) => {
-      const exists = prev.subscription_id.includes(uuid);
+      const exists = prev.subscription_id.includes(id);
 
       return {
         ...prev,
         subscription_id: exists
-          ? prev.subscription_id.filter((id) => id !== uuid)
-          : [...prev.subscription_id, uuid],
+          ? prev.subscription_id.filter((x) => x !== id)
+          : [...prev.subscription_id, id],
       };
     });
   };
@@ -69,7 +69,7 @@ export default function AddCoupon() {
       await couponService.create(form);
       navigate("/coupons");
     } catch (err) {
-      console.error(err);
+      console.error("Coupon Save Error:", err.response?.data || err);
       setErrors("Something went wrong while saving coupon.");
     } finally {
       setLoading(false);
@@ -82,7 +82,7 @@ export default function AddCoupon() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition border border-gray-200"
+          className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition "
         >
           <FiArrowLeft className="text-gray-700 text-lg" />
         </button>
@@ -100,7 +100,7 @@ export default function AddCoupon() {
       {/* FORM CARD */}
       <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm max-w-4xl">
         {errors && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">
+          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm ">
             {errors}
           </div>
         )}
@@ -152,21 +152,22 @@ export default function AddCoupon() {
               Applicable Subscriptions *
             </label>
 
-            <div className="mt-3 space-y-2 bg-gray-50 p-4 rounded-xl border">
+            <div className="mt-3 space-y-2 bg-gray-50 p-4 rounded-xl ">
               {subscriptions.length === 0 ? (
                 <p className="text-gray-500 text-sm">No subscriptions found.</p>
               ) : (
                 subscriptions.map((sub) => (
                   <label
-                    key={sub.uuid}
+                    key={sub.id}
                     className="flex items-center gap-3 text-sm text-gray-700"
                   >
                     <input
                       type="checkbox"
-                      checked={form.subscription_id.includes(sub.uuid)}
-                      onChange={() => toggleSubscription(sub.uuid)}
+                      checked={form.subscription_id.includes(sub.id)}
+                      onChange={() => toggleSubscription(sub.id)}
                       className="w-4 h-4"
                     />
+                    {/* FIXED: show the correct subscription name */}
                     {sub.subscription_name}
                   </label>
                 ))

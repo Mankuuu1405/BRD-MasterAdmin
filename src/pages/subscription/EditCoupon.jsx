@@ -18,7 +18,6 @@ export default function EditCoupon() {
     date_from: "",
     date_to: "",
     subscription_id: [],
-
     created_user: "",
     modified_user: "master_admin",
     isDeleted: false,
@@ -30,7 +29,7 @@ export default function EditCoupon() {
   // Load subscription list
   const loadSubscriptions = async () => {
     try {
-      const data = await subscriptionService.getAll(); // FIXED
+      const data = await subscriptionService.getAll();
       setSubscriptions(data);
     } catch (err) {
       console.error("Failed to load subscriptions", err);
@@ -40,16 +39,14 @@ export default function EditCoupon() {
   // Load coupon details
   const loadCoupon = async () => {
     try {
-      const data = await couponService.getOne(uuid); // FIXED
+      const data = await couponService.getOne(uuid);
 
       setForm({
         coupon_code: data.coupon_code,
         coupon_value: data.coupon_value,
         date_from: data.date_from,
         date_to: data.date_to,
-
-        subscription_id: data.subscription_id ?? [], // FIXED
-
+        subscription_id: data.subscription_id ?? [],
         created_user: data.created_user,
         modified_user: "master_admin",
         isDeleted: data.isDeleted,
@@ -68,7 +65,7 @@ export default function EditCoupon() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // toggle subscription
+  // Toggle subscription selection
   const toggleSubscription = (id) => {
     setForm((prev) => {
       const exists = prev.subscription_id.includes(id);
@@ -82,7 +79,7 @@ export default function EditCoupon() {
     });
   };
 
-  // submit update
+  // Submit update
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -90,8 +87,9 @@ export default function EditCoupon() {
 
     try {
       await couponService.update(uuid, form);
-      navigate("/coupons"); // FIXED route
+      navigate("/coupons");
     } catch (err) {
+      console.error("Update error:", err);
       setErrors("Something went wrong while updating the coupon.");
     } finally {
       setLoading(false);
@@ -104,25 +102,21 @@ export default function EditCoupon() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 border border-gray-200"
+          className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 "
         >
           <FiArrowLeft className="text-gray-700 text-lg" />
         </button>
 
         <div>
-          <h1 className="text-[22px] font-semibold text-gray-900">
-            Edit Coupon
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Update coupon details below.
-          </p>
+          <h1 className="text-[22px] font-semibold text-gray-900">Edit Coupon</h1>
+          <p className="text-gray-500 text-sm">Update coupon details below.</p>
         </div>
       </div>
 
       {/* CARD */}
-      <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm max-w-4xl">
+      <div className="bg-white   p-8 rounded-2xl shadow-sm max-w-4xl">
         {errors && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+          <div className="mb-6 p-4 bg-red-50   text-red-600 rounded-lg text-sm">
             {errors}
           </div>
         )}
@@ -172,21 +166,19 @@ export default function EditCoupon() {
               Applicable Subscriptions *
             </label>
 
-            <div className="mt-3 space-y-2 bg-gray-50 p-4 rounded-xl border">
+            <div className="mt-3 space-y-2 bg-gray-50 p-4 rounded-xl ">
               {subscriptions.length === 0 ? (
-                <p className="text-gray-500 text-sm">
-                  No subscriptions found.
-                </p>
+                <p className="text-gray-500 text-sm">No subscriptions found.</p>
               ) : (
                 subscriptions.map((sub) => (
                   <label
-                    key={sub.uuid}
+                    key={sub.id}
                     className="flex items-center gap-3 text-sm text-gray-700"
                   >
                     <input
                       type="checkbox"
-                      checked={form.subscription_id.includes(sub.uuid)}
-                      onChange={() => toggleSubscription(sub.uuid)}
+                      checked={form.subscription_id.includes(sub.id)}
+                      onChange={() => toggleSubscription(sub.id)}
                       className="w-4 h-4"
                     />
                     {sub.subscription_name}
@@ -218,7 +210,7 @@ function InputField({ label, ...props }) {
       <label className="text-gray-700 text-sm font-medium">{label}</label>
       <input
         {...props}
-        className="w-full mt-2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white outline-none text-sm"
+        className="w-full mt-2 p-3 rounded-xl bg-gray-50  focus:bg-white outline-none text-sm"
       />
     </div>
   );
